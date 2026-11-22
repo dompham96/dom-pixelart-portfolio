@@ -1,0 +1,84 @@
+{
+  "brandName": "DOM PIXEL ART",
+  "artistName": "Dom",
+  "realName": "Phú Sỹ",
+  "tagline": {
+    "vi": "Tiny dot... touch the story",
+    "en": "Tiny dot... touch the story"
+  },
+  "location": {
+    "vi": "TP. Hồ Chí Minh, Việt Nam",
+    "en": "Ho Chi Minh City, Vietnam"
+  },
+  "email": "dom.pham96@gmail.com",
+  "heroGreeting": {
+    "vi": "Chào mừng đến với ngôi nhà nhỏ của Dom. Vui lòng gác việc đang làm lại, bước vào trong và dạo một vòng triển lãm nhé.",
+    "en": "Welcome to Dom's cozy pixel studio. Pause what you're doing, step inside, and take a slow walk through the stories."
+  },
+  "aboutParagraphs": [
+    {
+      "vi": "Chào bạn, mình là Dom (tên thật là Phú Sỹ), nhưng cứ gọi mình là Dom nhé! Dom mê game, rất thích quan sát và hay chìm đắm trong những tưởng tượng. Mình dễ bị phân tâm bởi những chi tiết nhỏ nhất — những điều thường bị bỏ quên — và mình yêu những điều đó!",
+      "en": "Hi, I'm Dom (real name Phú Sỹ), but feel free to just call me Dom! I love games, quiet observation, and getting lost in imagination. I'm easily captivated by the tiniest details that people often walk past — and I adore them."
+    },
+    {
+      "vi": "Mình tin rằng những điều vĩ đại xuất phát từ những điểm nhỏ bé... Tiny dot. Dom tìm thấy niềm vui từ những thứ nhỏ bé ấy — chúng lấp lánh và mang trong mình bao lớp câu chuyện thú vị chờ ta khám phá. Như cậu bé chìm đắm trong dungeon vô tình tìm thấy lối đi bí mật, hay lắng nghe câu chuyện từ một NPC vô danh đầy cảm xúc, hay bất ngờ bên trong hòm kho báu.",
+      "en": "I believe great things begin from tiny dots. Those tiny details shimmer with hidden layers of stories waiting to be discovered — like stumbling upon a secret passage in a dungeon, listening to an unnamed NPC with a moving backstory, or finding a surprise inside a treasure chest."
+    },
+    {
+      "vi": "Pixel art là niềm đam mê lớn của Dom. Nó cho mình không gian để tưởng tượng, là thử thách thú vị trong hành trình sắp xếp lại những bề bộn và học cách \"đơn giản hóa\" điều mình muốn nói. Với Dom, \"Chuyện của những chấm nhỏ\" là tình cảm đặc biệt dành cho những ký ức tuổi thơ, khoảnh khắc bình yên đời thường, hay một ước mơ nhỏ bé được giấu kín.",
+      "en": "Pixel art is my biggest passion right now. It gives me room to imagine while challenging me to untangle clutter and simplify what I want to say. \"Stories of tiny dots\" is my love letter to childhood memories, peaceful everyday moments, and quiet hidden dreams."
+    },
+    {
+      "vi": "Hy vọng qua những mẩu chuyện nhỏ này, bạn sẽ tìm thấy một mảnh ghép mà mình từng bỏ lỡ. Kể mình nghe câu chuyện của bạn nhé! Chúc bạn ngày bình yên và nhiều niềm vui.",
+      "en": "I hope these little scenes help you reconnect with a piece of memory you almost forgot. Tell me your story sometime! Wishing you a peaceful, joyful day."
+    }
+  ],
+  "contactMessage": {
+    "vi": "Mến chào bạn. Dom rất vui khi bạn đã tìm tới đây. Dom hơi hướng nội… nhưng không ngại kết nối và hợp tác, hay chỉ đơn giản là một buổi cà phê thư giãn cùng nhau. Hãy nhắn tin cho Dom nhé!",
+    "en": "Hello there. I'm really glad you found your way here. I'm a bit of an introvert… yet I'm always happy to connect, collaborate on projects/commissions, or simply share a quiet cup of coffee. Drop me a message!"
+  },
+  "socials": [
+    {
+      "id": "instagram",
+      "label": "Instagram",
+      "handle": "@dom.pixelart",
+      "url": "https://www.instagram.com/dom.pixelart",
+      "platform": "instagram"
+    },
+    {
+      "id": "threads",
+      "label": "Threads",
+      "handle": "@dom.pixelart",
+      "url": "https://www.threads.com/@dom.pixelart",
+      "platform": "threads"
+    },
+    {
+      "id": "tiktok",
+      "label": "TikTok",
+      "handle": "@dom.pixelart",
+      "url": "https://www.tiktok.com/@dom.pixelart",
+      "platform": "tiktok"
+    },
+    {
+      "id": "facebook-page",
+      "label": "Dom Fanpage",
+      "handle": "Dom Pixel Art",
+      "url": "https://www.facebook.com/profile.php?id=61577239178321",
+      "platform": "facebook"
+    },
+    {
+      "id": "facebook-personal",
+      "label": "Facebook",
+      "handle": "Sy.PhamPhu",
+      "url": "https://www.facebook.com/sy.phamphu",
+      "platform": "facebook"
+    },
+    {
+      "id": "linktree",
+      "label": "Linktree",
+      "handle": "linktr.ee/DomPixelart",
+      "url": "https://linktr.ee/DomPixelart",
+      "platform": "linktree"
+    }
+  ]
+}

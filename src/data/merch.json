@@ -1,0 +1,67 @@
+[
+  {
+    "id": "postcard-qua-o-cua-so",
+    "title": { "vi": "Qua Ô Cửa Sổ", "en": "Through the Window" },
+    "format": { "vi": "Postcard A5", "en": "A5 Art Postcard" },
+    "specs": [
+      { "vi": "Size A5 (14.8 × 21 cm)", "en": "Size A5 (14.8 × 21 cm)" },
+      { "vi": "Giấy C300 — không màng", "en": "300gsm Matte Art Paper (uncoated)" },
+      { "vi": "Bao gồm bìa kính bảo vệ", "en": "Includes clear protective sleeve" }
+    ],
+    "collectionId": "qua-o-cua-so",
+    "proceduralKey": "qua_o_cua_so",
+    "available": true
+  },
+  {
+    "id": "postcard-com-co-tam",
+    "title": { "vi": "Cơm Cô Tấm", "en": "Com Co Tam" },
+    "format": { "vi": "Postcard A5", "en": "A5 Art Postcard" },
+    "specs": [
+      { "vi": "Size A5 (14.8 × 21 cm)", "en": "Size A5 (14.8 × 21 cm)" },
+      { "vi": "Giấy C300 — không màng", "en": "300gsm Matte Art Paper (uncoated)" },
+      { "vi": "Bao gồm bìa kính bảo vệ", "en": "Includes clear protective sleeve" }
+    ],
+    "collectionId": "sai-gon-tales",
+    "proceduralKey": "saigon_com_tam",
+    "available": true
+  },
+  {
+    "id": "postcard-ca-phe-cam-ep",
+    "title": { "vi": "Cà Phê Cám Ép", "en": "Street Iced Coffee" },
+    "format": { "vi": "Postcard A5", "en": "A5 Art Postcard" },
+    "specs": [
+      { "vi": "Size A5 (14.8 × 21 cm)", "en": "Size A5 (14.8 × 21 cm)" },
+      { "vi": "Giấy C300 — không màng", "en": "300gsm Matte Art Paper (uncoated)" },
+      { "vi": "Bao gồm bìa kính bảo vệ", "en": "Includes clear protective sleeve" }
+    ],
+    "collectionId": "sai-gon-tales",
+    "proceduralKey": "saigon_coffee",
+    "available": true
+  },
+  {
+    "id": "postcard-hu-teu",
+    "title": { "vi": "Hủ Tễu", "en": "Late-Night Hu Tieu" },
+    "format": { "vi": "Postcard A5", "en": "A5 Art Postcard" },
+    "specs": [
+      { "vi": "Size A5 (14.8 × 21 cm)", "en": "Size A5 (14.8 × 21 cm)" },
+      { "vi": "Giấy C300 — không màng", "en": "300gsm Matte Art Paper (uncoated)" },
+      { "vi": "Bao gồm bìa kính bảo vệ", "en": "Includes clear protective sleeve" }
+    ],
+    "collectionId": "sai-gon-tales",
+    "proceduralKey": "saigon_hu_tieu",
+    "available": true
+  },
+  {
+    "id": "postcard-dau-xanh-vs-thap-cam",
+    "title": { "vi": "Đậu Xanh vs Thập Cẩm", "en": "Mung Bean vs Mixed Nuts" },
+    "format": { "vi": "Postcard A5", "en": "A5 Art Postcard" },
+    "specs": [
+      { "vi": "Size A5 (14.8 × 21 cm)", "en": "Size A5 (14.8 × 21 cm)" },
+      { "vi": "Giấy C300 — không màng", "en": "300gsm Matte Art Paper (uncoated)" },
+      { "vi": "Bao gồm bìa kính bảo vệ", "en": "Includes clear protective sleeve" }
+    ],
+    "collectionId": "trung-thu-vui-ky",
+    "proceduralKey": "trung_thu_mooncake",
+    "available": true
+  }
+]

@@ -1,0 +1,48 @@
+{
+  "id": "trung-thu",
+  "name": { "vi": "Mùa Trung Thu Vui Ký", "en": "Mid-Autumn Lantern Night" },
+  "badge": { "vi": "Trung Thu", "en": "Mid-Autumn" },
+  "description": {
+    "vi": "Đêm rằm tháng Tám rực rỡ đèn lồng giấy kiếng, mâm cỗ trông trăng và hoa đăng bay lên trời.",
+    "en": "Full-moon night glowing with cellophane lanterns, mooncake tea table, and rising sky lanterns."
+  },
+  "skyColor": "#171321",
+  "ambientOverlay": "rgba(32, 18, 48, 0.25)",
+  "spotlightColor": "rgba(255, 174, 51, 0.34)",
+  "particleType": "lanterns",
+  "particleCount": 20,
+  "bgmTempo": 82,
+  "extraProps": [
+    {
+      "id": "seasonal-lantern-1",
+      "kind": "lantern",
+      "x": 10,
+      "y": 13,
+      "solid": false
+    },
+    {
+      "id": "seasonal-lantern-2",
+      "kind": "lantern",
+      "x": 13,
+      "y": 13,
+      "solid": false
+    },
+    {
+      "id": "seasonal-moon-table",
+      "kind": "moon_table",
+      "x": 7,
+      "y": 15,
+      "solid": true,
+      "label": { "vi": "Mâm cỗ Đậu Xanh vs Thập Cẩm", "en": "Mooncake Tea Table" },
+      "action": { "type": "artwork", "collectionId": "trung-thu-vui-ky" }
+    }
+  ],
+  "npcDialogueOverrides": {
+    "ink_cat": [
+      {
+        "vi": "Meo~ Chúc bạn Trung Thu thật ấm áp! Ngoài sân có mâm cỗ bánh nướng đó, bạn thuộc phe Đậu Xanh hay Thập Cẩm?",
+        "en": "Meow~ Happy Mid-Autumn Festival! Check out the mooncake table in the yard — are you Team Mung Bean or Team Mixed Nuts?"
+      }
+    ]
+  }
+}

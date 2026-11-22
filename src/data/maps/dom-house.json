@@ -1,0 +1,361 @@
+{
+  "id": "dom-house",
+  "name": {
+    "vi": "Nhà Studio của Dom",
+    "en": "Dom's Cozy Studio House"
+  },
+  "width": 24,
+  "height": 20,
+  "tileSize": 16,
+  "spawn": {
+    "x": 11,
+    "y": 18,
+    "facing": "up"
+  },
+  "tiles": [
+    "........................",
+    "..TTTTTTTTTTTTTTTTTTTT..",
+    "..TIIIIIIIIIIIIIIIIIIT..",
+    "..TFFFFFFFFFFFFFFFFFFT..",
+    "..TFFCCCCCCCCCCCCCCFFT..",
+    "..TFCFFFFFFFFFFFFFFCFT..",
+    "..TFCFFFFFFFFFFFFFFCFT..",
+    "..TFCFFFFFFFFFFFFFFCFT..",
+    "..TFCFFCCCCCCCCCCFFCFT..",
+    "..TFCFFCCCCCCCCCCFFCFT..",
+    "..TFFFFFFFFFFFFFFFFFFT..",
+    "..TFFFFFFFFFFFFFFFFFFT..",
+    "..WWNNWWWWWDDWWWWWNNWW..",
+    "..GGGGGGGGOOOOGGGGGGGG..",
+    "..GGGGGGGGGPPGGGGGGGGG..",
+    "..GGGGGGGGGPPGGGGGGGGG..",
+    "..GGGGGGGGGPPGGGGGGGGG..",
+    "..GGGGGGGGGPPPPPPPPPPG..",
+    "..GGGGGGGGGPPGGGGGGGGG..",
+    "........................"
+  ],
+  "props": [
+    {
+      "id": "frame-saigon",
+      "kind": "art_frame",
+      "x": 4,
+      "y": 2,
+      "solid": true,
+      "accentColor": "#FFCF3D",
+      "label": { "vi": "Sai Gon Tales", "en": "Sai Gon Tales" },
+      "action": { "type": "artwork", "collectionId": "sai-gon-tales" }
+    },
+    {
+      "id": "frame-trungthu",
+      "kind": "art_frame",
+      "x": 7,
+      "y": 2,
+      "solid": true,
+      "accentColor": "#FFAE33",
+      "label": { "vi": "Trung Thu Vui Ký", "en": "Mid-Autumn Chronicles" },
+      "action": { "type": "artwork", "collectionId": "trung-thu-vui-ky" }
+    },
+    {
+      "id": "frame-mamment",
+      "kind": "art_frame",
+      "x": 10,
+      "y": 2,
+      "solid": true,
+      "accentColor": "#E88D4F",
+      "label": { "vi": "The Mâm-ment", "en": "The Mâm-ment" },
+      "action": { "type": "artwork", "collectionId": "the-mam-ment" }
+    },
+    {
+      "id": "frame-window",
+      "kind": "art_frame",
+      "x": 13,
+      "y": 2,
+      "solid": true,
+      "accentColor": "#72B8FF",
+      "label": { "vi": "Qua Ô Cửa Sổ", "en": "Through the Window" },
+      "action": { "type": "artwork", "collectionId": "qua-o-cua-so" }
+    },
+    {
+      "id": "frame-malon",
+      "kind": "art_frame",
+      "x": 16,
+      "y": 2,
+      "solid": true,
+      "accentColor": "#C084FC",
+      "label": { "vi": "Ma Lon", "en": "Ma Lon" },
+      "action": { "type": "artwork", "collectionId": "ma-lon" }
+    },
+    {
+      "id": "frame-ran",
+      "kind": "art_frame",
+      "x": 19,
+      "y": 2,
+      "solid": true,
+      "accentColor": "#7ED957",
+      "label": { "vi": "Rắn Ăn Tásk", "en": "Task-Eating Snake" },
+      "action": { "type": "artwork", "collectionId": "ran-an-task" }
+    },
+    {
+      "id": "easel-astrovert",
+      "kind": "art_frame",
+      "x": 19,
+      "y": 6,
+      "solid": true,
+      "accentColor": "#60A5FA",
+      "label": { "vi": "Astrovert (WIP)", "en": "Astrovert (WIP)" },
+      "action": { "type": "artwork", "collectionId": "astrovert" }
+    },
+    {
+      "id": "easel-ink",
+      "kind": "art_frame",
+      "x": 19,
+      "y": 9,
+      "solid": true,
+      "accentColor": "#F472B6",
+      "label": { "vi": "Ink the Game (WIP)", "en": "Ink the Game (WIP)" },
+      "action": { "type": "artwork", "collectionId": "ink-the-game" }
+    },
+    {
+      "id": "merch-counter",
+      "kind": "merch_stall",
+      "x": 4,
+      "y": 9,
+      "w": 2,
+      "h": 1,
+      "solid": true,
+      "label": { "vi": "Quầy Postcard A5", "en": "Postcard Merch Stall" },
+      "action": { "type": "merch" }
+    },
+    {
+      "id": "dom-desk",
+      "kind": "easel_desk",
+      "x": 16,
+      "y": 7,
+      "w": 2,
+      "h": 1,
+      "solid": true,
+      "label": { "vi": "Bàn vẽ của Dom (About)", "en": "Dom's Studio Desk (About)" },
+      "action": { "type": "about" }
+    },
+    {
+      "id": "exhibition-catalog",
+      "kind": "tea_table",
+      "x": 11,
+      "y": 8,
+      "w": 2,
+      "h": 1,
+      "solid": true,
+      "label": { "vi": "Sổ Triển Lãm (Xem Tranh Nhanh)", "en": "Exhibition Catalog (Quick Gallery)" },
+      "action": { "type": "gallery" }
+    },
+    {
+      "id": "plant-nw",
+      "kind": "potted_plant",
+      "x": 3,
+      "y": 3,
+      "solid": true
+    },
+    {
+      "id": "plant-ne",
+      "kind": "potted_plant",
+      "x": 20,
+      "y": 3,
+      "solid": true
+    },
+    {
+      "id": "plant-sw",
+      "kind": "potted_plant",
+      "x": 3,
+      "y": 11,
+      "solid": true
+    },
+    {
+      "id": "bookshelf-w",
+      "kind": "bookshelf",
+      "x": 3,
+      "y": 6,
+      "solid": true,
+      "label": { "vi": "Kệ sách phác thảo", "en": "Sketchbook Shelf" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Kệ Phác Thảo", "en": "Sketchbook Shelf" },
+        "portrait": "dom",
+        "lines": [
+          {
+            "vi": "Xếp đầy sổ tay ghi chép những chi tiết nhỏ nhặt dọc các con hẻm Sài Gòn...",
+            "en": "Packed with tiny notebooks full of sketches from Saigon's quiet alleyways..."
+          },
+          {
+            "vi": "Một mảnh giấy note ghi: \"Tiny dot... touch the story.\"",
+            "en": "A sticky note reads: \"Tiny dot... touch the story.\""
+          }
+        ]
+      }
+    },
+    {
+      "id": "welcome-sign",
+      "kind": "welcome_sign",
+      "x": 9,
+      "y": 15,
+      "solid": true,
+      "label": { "vi": "Biển hiệu Dom Pixel Art", "en": "Dom Pixel Art Sign" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Biển Gỗ Trước Sân", "en": "Wooden Yard Sign" },
+        "portrait": "dom",
+        "lines": [
+          {
+            "vi": "DOM PIXEL ART — Nhà triển lãm của những chấm nhỏ. Bước thẳng vào cửa trước để xem tranh nhé!",
+            "en": "DOM PIXEL ART — Home of tiny dots. Head straight through the front door to explore the exhibition!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "contact-mailbox",
+      "kind": "mailbox",
+      "x": 14,
+      "y": 14,
+      "solid": true,
+      "label": { "vi": "Hộp thư Liên Hệ", "en": "Contact Mailbox" },
+      "action": { "type": "contact" }
+    },
+    {
+      "id": "lamp-porch-left",
+      "kind": "lamp_post",
+      "x": 9,
+      "y": 13,
+      "solid": true
+    },
+    {
+      "id": "lamp-yard-right",
+      "kind": "lamp_post",
+      "x": 14,
+      "y": 16,
+      "solid": true
+    },
+    {
+      "id": "tree-yard-1",
+      "kind": "tree",
+      "x": 4,
+      "y": 14,
+      "solid": true
+    },
+    {
+      "id": "tree-yard-2",
+      "kind": "tree",
+      "x": 6,
+      "y": 17,
+      "solid": true
+    },
+    {
+      "id": "tree-yard-3",
+      "kind": "tree",
+      "x": 17,
+      "y": 14,
+      "solid": true
+    },
+    {
+      "id": "town-gate",
+      "kind": "town_gate",
+      "x": 20,
+      "y": 17,
+      "solid": true,
+      "label": { "vi": "Lối ra Thị Trấn (Sắp mở)", "en": "Town Gate (Coming Soon)" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Cổng Thị Trấn Sài Gòn", "en": "Town Expansion Gate" },
+        "portrait": "ink_cat",
+        "lines": [
+          {
+            "vi": "Meo~ Lối đi sang Khu Phố Sài Gòn đang được Dom vẽ thêm tileset từng viên gạch một!",
+            "en": "Meow~ The path to Saigon Town is being hand-pixelled brick by brick by Dom!"
+          },
+          {
+            "vi": "Quay lại vào các mùa cập nhật tới để khám phá màn chơi mới nhé.",
+            "en": "Check back in future seasonal updates to unlock the new neighborhood."
+          }
+        ]
+      }
+    }
+  ],
+  "npcs": [
+    {
+      "id": "ink_cat",
+      "name": { "vi": "Mèo Ink", "en": "Ink the Cat" },
+      "spriteKey": "ink_cat",
+      "x": 10,
+      "y": 16,
+      "facing": "right",
+      "dialogue": [
+        {
+          "vi": "Meo! Chào mừng bạn ghé thăm nhà của Dom! Mình là Ink — trợ lý gác cổng triển lãm.",
+          "en": "Meow! Welcome to Dom's studio house! I'm Ink — your exhibition greeter."
+        },
+        {
+          "vi": "Bạn cứ chạm vào sàn (hoặc dùng WASD/mũi tên) để đi vào trong nhà xem 8 bộ tranh treo tường, bàn Postcard và nói chuyện với Dom nhé!",
+          "en": "Tap anywhere on the floor (or use WASD/Arrows) to walk inside, inspect the 8 framed series, browse postcards, and chat with Dom!"
+        }
+      ],
+      "actionButton": {
+        "label": { "vi": "Xem nhanh toàn bộ tranh", "en": "Open Quick Gallery" },
+        "actionType": "gallery"
+      }
+    },
+    {
+      "id": "dom",
+      "name": { "vi": "Dom (Phú Sỹ)", "en": "Dom (Phú Sỹ)" },
+      "spriteKey": "dom",
+      "x": 15,
+      "y": 8,
+      "facing": "left",
+      "dialogue": [
+        {
+          "vi": "Chào bạn! Mình là Dom. Cảm ơn bạn đã gác bộn bề lại để ghé căn phòng nhỏ này.",
+          "en": "Hey there! I'm Dom. Thanks for pausing your busy day to visit my little pixel room."
+        },
+        {
+          "vi": "Mỗi bức tranh trên tường đều bắt đầu từ một chấm nhỏ (tiny dot) và một mảnh ký ức thân thuộc. Thích bộ nào cứ chạm vào khung tranh để nghe câu chuyện nhé!",
+          "en": "Every artwork on these walls began as a tiny dot and a cherished memory. Walk up to any frame to read its full story!"
+        }
+      ],
+      "actionButton": {
+        "label": { "vi": "Đọc thêm về Dom", "en": "Read Full Bio" },
+        "actionType": "about"
+      }
+    },
+    {
+      "id": "task_snake",
+      "name": { "vi": "Rắn Ăn Tásk", "en": "Task-Eating Snake" },
+      "spriteKey": "task_snake",
+      "x": 7,
+      "y": 9,
+      "facing": "right",
+      "dialogue": [
+        {
+          "vi": "Khè khè... Hồi xưa rắn ăn táo, lớn lên chút ăn Tásk hết thanh xuân luôn bạn ơi :')",
+          "en": "Hiss... Back then snakes ate apples, now we eat Tasks all year long :')"
+        },
+        {
+          "vi": "Bên trái mình là quầy Postcard A5 giấy C300 xịn lắm đó, ghé xem thử nhé!",
+          "en": "Right to my left is the A5 C300 Postcard stall — go take a peek!"
+        }
+      ],
+      "actionButton": {
+        "label": { "vi": "Xem bộ Rắn Ăn Tásk", "en": "View Task-Eating Snake" },
+        "actionType": "artwork",
+        "collectionId": "ran-an-task"
+      }
+    }
+  ],
+  "portals": [
+    {
+      "id": "portal-town",
+      "x": 20,
+      "y": 17,
+      "targetMapId": "saigon-town",
+      "locked": true,
+      "label": { "vi": "Khu Phố Sài Gòn (Sắp mở)", "en": "Saigon Town (Coming Soon)" }
+    }
+  ]
+}

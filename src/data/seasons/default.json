@@ -1,0 +1,17 @@
+{
+  "id": "default",
+  "name": { "vi": "Đêm Triển Lãm Ấm Áp", "en": "Cozy Night Exhibition" },
+  "badge": { "vi": "Cozy Night", "en": "Cozy Night" },
+  "description": {
+    "vi": "Không gian đêm ấm áp đặc trưng với ánh đèn rọi vàng và hạt đom đóm lơ lửng.",
+    "en": "Signature cozy night atmosphere with warm golden spotlights and drifting fireflies."
+  },
+  "skyColor": "#131211",
+  "ambientOverlay": "rgba(19, 18, 17, 0.24)",
+  "spotlightColor": "rgba(255, 207, 61, 0.28)",
+  "particleType": "fireflies",
+  "particleCount": 24,
+  "bgmTempo": 76,
+  "extraProps": [],
+  "npcDialogueOverrides": {}
+}

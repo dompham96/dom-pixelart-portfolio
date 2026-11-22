@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+:root {
+  --bg-obsidian: #131211;
+  --bg-gallery: #1c1b19;
+  --bg-elevated: #252320;
+  --accent-gold: #ffcf3d;
+  --accent-gold-dim: #cfa025;
+  --accent-amber: #e88d4f;
+  --ink-primary: #f5efe6;
+  --ink-muted: #a89f91;
+  --border-pixel: #3b3630;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-obsidian);
+  color: var(--ink-primary);
+  font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+.font-pixel {
+  font-family: 'Pixelify Sans', monospace;
+  letter-spacing: 0.02em;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Tactile pixel-bevel museum UI surface */
+.pixel-panel {
+  background-color: var(--bg-gallery);
+  border: 2px solid var(--border-pixel);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.45),
+    0 8px 24px rgba(0, 0, 0, 0.55);
+}
+
+.pixel-btn {
+  font-family: 'Pixelify Sans', monospace;
+  border: 2px solid var(--border-pixel);
+  background-color: var(--bg-elevated);
+  color: var(--ink-primary);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.45),
+    0 3px 0 #0a0908;
+  transition: transform 90ms ease, background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pixel-btn:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  transform: translateY(-1px);
+}
+
+.pixel-btn:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 0 rgba(0, 0, 0, 0.3),
+    0 1px 0 #0a0908;
+}
+
+.pixel-btn-primary {
+  background-color: var(--accent-gold);
+  border-color: #ffe285;
+  color: #131211;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -3px 0 #b88816,
+    0 4px 0 #0a0908;
+}
+
+.pixel-btn-primary:hover {
+  background-color: #ffd961;
+  border-color: #fff2bd;
+  color: #131211;
+}
+
+/* Subtle warm museum spotlight backdrop */
+.museum-backdrop {
+  background:
+    radial-gradient(circle at 50% 15%, rgba(255, 207, 61, 0.09) 0%, rgba(232, 141, 79, 0.03) 35%, rgba(19, 18, 17, 0) 68%),
+    linear-gradient(180deg, #161513 0%, #131211 100%);
+}
+
+/* Blink animation for "PRESS START" */
+@keyframes pixel-blink {
+  0%, 55% { opacity: 1; }
+  65%, 100% { opacity: 0.35; }
+}
+
+.animate-pixel-blink {
+  animation: pixel-blink 1.5s steps(2, end) infinite;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-float-slow {
+  animation: float-slow 3.2s ease-in-out infinite;
+}
+
+/* Custom dark scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #131211;
+}
+::-webkit-scrollbar-thumb {
+  background: #3b3630;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ffcf3d;
+}

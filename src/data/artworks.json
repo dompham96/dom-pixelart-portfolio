@@ -1,0 +1,313 @@
+[
+  {
+    "id": "sai-gon-tales",
+    "slug": "sai-gon-tales",
+    "title": {
+      "vi": "Sai Gon Tales",
+      "en": "Sai Gon Tales"
+    },
+    "subtitle": {
+      "vi": "Chuyện hương vị và góc phố Sài Gòn qua từng điểm ảnh",
+      "en": "Saigon taste tales & cozy street corners in pixels"
+    },
+    "year": "2025",
+    "category": "saigon",
+    "status": "published",
+    "accentColor": "#FFCF3D",
+    "youtubeIds": ["3c1bcZ-3Fgk", "97zPfLVLy7g", "Or68HUt94pA"],
+    "story": [
+      {
+        "vi": "Loạt tranh và hoạt ảnh ngắn ghi lại hương vị thân quen của Sài Gòn — từ dĩa Cơm Cô Tấm nóng hổi, ly Cà Phê Cám Ép buổi sáng cho đến tô Hủ Tễu đêm khuya lấp lánh ánh đèn vàng.",
+        "en": "A pixel art & animated series capturing Saigon's everyday flavors — from steaming broken rice plates and morning street coffee to late-night noodle carts glowing under warm streetlamps."
+      }
+    ],
+    "items": [
+      {
+        "id": "com-co-tam",
+        "title": { "vi": "Cơm Cô Tấm", "en": "Com Co Tam (Broken Rice)" },
+        "proceduralKey": "saigon_com_tam",
+        "dimensions": "160 × 120 px",
+        "merchId": "postcard-com-co-tam",
+        "caption": {
+          "vi": "Khói sườn nướng thơm lừng góc hẻm Sài Gòn buổi trưa.",
+          "en": "Smoky grilled pork drifting down a sunny Saigon alley."
+        }
+      },
+      {
+        "id": "ca-phe-cam-ep",
+        "title": { "vi": "Cà Phê Cám Ép", "en": "Street Iced Coffee" },
+        "proceduralKey": "saigon_coffee",
+        "dimensions": "160 × 120 px",
+        "merchId": "postcard-ca-phe-cam-ep",
+        "caption": {
+          "vi": "Nhịp sống chậm lại đôi chút bên chiếc ghế nhựa vỉa hè.",
+          "en": "Life slows down for a moment on low sidewalk stools."
+        }
+      },
+      {
+        "id": "hu-teu",
+        "title": { "vi": "Hủ Tễu Đêm", "en": "Late-Night Hu Tieu Cart" },
+        "proceduralKey": "saigon_hu_tieu",
+        "dimensions": "160 × 120 px",
+        "merchId": "postcard-hu-teu",
+        "caption": {
+          "vi": "Ánh đèn vàng ấm của xe hủ tiếu gõ giữa đêm Sài Gòn.",
+          "en": "The warm golden bulb of a midnight noodle cart."
+        }
+      }
+    ]
+  },
+  {
+    "id": "the-mam-ment",
+    "slug": "the-mam-ment",
+    "title": {
+      "vi": "The Mâm-ment",
+      "en": "The Mâm-ment"
+    },
+    "subtitle": {
+      "vi": "Bữa tiệc cảm xúc bên mâm cơm ký ức",
+      "en": "A feast of memories around the family dining tray"
+    },
+    "year": "2025",
+    "dateStamp": "TP.HCM, 01/08/2025",
+    "category": "life",
+    "status": "published",
+    "accentColor": "#E88D4F",
+    "story": [
+      {
+        "vi": "Nếu có ước muốn cho cuộc đời này, hãy nhớ ước muốn cho thời gian trở lại — trở lại những moment đầy cảm xúc tưởng như nhỏ bé nhưng là dư vị mãi không phai trong Mâm cỗ đầy cảm xúc này.",
+        "en": "If there is a wish in this life, let it be to revisit those small yet unforgettable moments lingering around this feast of emotions."
+      },
+      {
+        "vi": "Nhớ từng lần ý ẹ món không ưa, những lần lén ăn trộm bim bim giờ lên lớp, hộp kim chỉ bích quy, đồ chơi giản dị của ngày ấu; nhớ cả những đêm ngày dài nỗ lực cho tương lai, tiếng nắp bật vang tai, đến lúc quây quần bên mâm cơm gia đình đầy thương mến.",
+        "en": "Remembering picky-eater childhood sighs, sneaking snacks in class, sewing kits hidden in butter-cookie tins, late nights working hard for tomorrow, clinking cans with friends, and coming home to the warmth of a family meal."
+      },
+      {
+        "vi": "Hãy dành sự chú ý cho những tiểu tiết đó — vì nó rất đẹp và là một phần tạo nên căn tính con người chúng ta. Hy vọng tác phẩm giúp bạn nhìn lại hành trình mình cách tích cực và mỉm cười bước về phía trước.",
+        "en": "Pay attention to those tiny details — they are beautiful and shape who we are. May this artwork help you look back gently and smile as you move forward."
+      }
+    ],
+    "items": [
+      {
+        "id": "mam-ment-main",
+        "title": { "vi": "The Mâm-ment (Bản đầy đủ)", "en": "The Mâm-ment (Full Feast)" },
+        "proceduralKey": "the_mam_ment",
+        "dimensions": "240 × 180 px",
+        "caption": {
+          "vi": "Mâm cơm gói trọn ký ức tuổi thơ, trưởng thành và gia đình.",
+          "en": "A dining tray holding childhood, growing up, and home."
+        }
+      }
+    ]
+  },
+  {
+    "id": "trung-thu-vui-ky",
+    "slug": "trung-thu-vui-ky",
+    "title": {
+      "vi": "Trung Thu Vui Ký",
+      "en": "Mid-Autumn Chronicles"
+    },
+    "subtitle": {
+      "vi": "Đêm rằm phá cỗ, đèn lồng và trận chiến Đậu xanh vs Thập cẩm",
+      "en": "Full-moon lanterns & the great Mung Bean vs Mixed Nuts mooncake showdown"
+    },
+    "year": "2025",
+    "category": "festival",
+    "status": "published",
+    "accentColor": "#FFAE33",
+    "story": [
+      {
+        "vi": "Ký ức đêm rằm tháng Tám rực rỡ ánh đèn lồng giấy kiếng, tiếng trống lân rộn ràng và cuộc tranh luận muôn thuở mỗi mùa bánh nướng: Phe Đậu Xanh hay Phe Thập Cẩm?",
+        "en": "Nostalgic Mid-Autumn nights glowing with cellophane lanterns, lion dance drums, and the timeless debate every season: Team Mung Bean or Team Mixed Nuts?"
+      }
+    ],
+    "items": [
+      {
+        "id": "dau-xanh-vs-thap-cam",
+        "title": { "vi": "Đậu Xanh vs Thập Cẩm", "en": "Mung Bean vs Mixed Nuts" },
+        "proceduralKey": "trung_thu_mooncake",
+        "dimensions": "160 × 120 px",
+        "merchId": "postcard-dau-xanh-vs-thap-cam",
+        "caption": {
+          "vi": "Hai chiến tuyến huyền thoại mỗi dịp Trung Thu.",
+          "en": "The two legendary rivals of every Mid-Autumn Festival."
+        }
+      }
+    ]
+  },
+  {
+    "id": "qua-o-cua-so",
+    "slug": "qua-o-cua-so",
+    "title": {
+      "vi": "Qua Ô Cửa Sổ",
+      "en": "Through the Window"
+    },
+    "subtitle": {
+      "vi": "Những lát cắt bình yên nhìn ra thế giới bên ngoài",
+      "en": "Quiet slices of life framed by a cozy window"
+    },
+    "year": "2025",
+    "category": "life",
+    "status": "published",
+    "accentColor": "#72B8FF",
+    "story": [
+      {
+        "vi": "Đôi khi chỉ cần ngồi bên bậu cửa sổ, nhìn mây trôi, mưa rơi hay ánh đèn thành phố lên đèn cũng đủ thấy cả một câu chuyện dịu dàng đang diễn ra.",
+        "en": "Sometimes sitting by the windowsill — watching drifting clouds, soft rain, or city lights turning on — is already a gentle story in itself."
+      }
+    ],
+    "items": [
+      {
+        "id": "qua-o-cua-so-main",
+        "title": { "vi": "Qua Ô Cửa Sổ", "en": "Through the Window" },
+        "proceduralKey": "qua_o_cua_so",
+        "dimensions": "160 × 120 px",
+        "merchId": "postcard-qua-o-cua-so",
+        "caption": {
+          "vi": "Góc nhìn bình yên từ khung cửa nhỏ.",
+          "en": "A peaceful evening view framed by wooden shutters."
+        }
+      }
+    ]
+  },
+  {
+    "id": "ran-an-task",
+    "slug": "ran-an-task",
+    "title": {
+      "vi": "Rắn Ăn Tásk",
+      "en": "Task-Eating Snake"
+    },
+    "subtitle": {
+      "vi": "Hồi xưa rắn ăn táo... lớn lên chút ăn Task hết thanh xuân",
+      "en": "Used to eat apples... grew up eating Tasks all year long"
+    },
+    "year": "2025",
+    "category": "festival",
+    "status": "published",
+    "accentColor": "#7ED957",
+    "story": [
+      {
+        "vi": "Hồi xưa thì rắn ăn táo.... lớn lên chút ăn Task hết thanh xuân.",
+        "en": "Back in the day, snakes ate apples... grow up a little and you eat Tasks for the rest of your youth."
+      },
+      {
+        "vi": "Tác phẩm là hành trình Rắn về quê dọn nhà đón Tết: đoạn lau bàn ghế rồng phượng, đoạn vừa nấu bánh, vừa dọn vệ sinh, vừa tranh thủ vẽ thêm dự án cá nhân, vừa lôi hết quần áo ra dọn, vừa muốn lăn ra ngủ. Nhưng không... Tết này không ăn táo, Tết này ăn Tásk :')",
+        "en": "A Tet homecoming chronicle: polishing dragon-carved furniture, boiling banh chung, scrubbing floors, squeezing in side projects, sorting closets, and wanting to nap — all at once. No apples this Lunar New Year, only Tasks :')"
+      }
+    ],
+    "items": [
+      {
+        "id": "ran-an-task-main",
+        "title": { "vi": "Rắn Ăn Tásk — Dọn Nhà Đón Tết", "en": "Task-Eating Snake — Tet Chores" },
+        "proceduralKey": "ran_an_task",
+        "dimensions": "192 × 144 px",
+        "caption": {
+          "vi": "Càng dọn càng dài như con rắn game cổ điển.",
+          "en": "The to-do list grows longer with every chore completed."
+        }
+      }
+    ]
+  },
+  {
+    "id": "ma-lon",
+    "slug": "ma-lon",
+    "title": {
+      "vi": "Ma Lon",
+      "en": "Ma Lon (Ghost Can)"
+    },
+    "subtitle": {
+      "vi": "Góc kể chuyện dân gian pha nét hóm hỉnh đêm khuya",
+      "en": "Playful midnight folklore reimagined in tiny pixels"
+    },
+    "year": "2025",
+    "category": "life",
+    "status": "published",
+    "accentColor": "#C084FC",
+    "story": [
+      {
+        "vi": "Lấy cảm hứng từ trò chơi dân gian và những câu chuyện rùng rợn nhưng dễ thương thời thơ ấu dưới ánh trăng mờ và tiếng lon sữa bò lăn leng keng trong con hẻm vắng.",
+        "en": "Inspired by Vietnamese folklore and playful childhood ghost stories — a tin can clinking softly down a moonlit alley."
+      }
+    ],
+    "items": [
+      {
+        "id": "ma-lon-main",
+        "title": { "vi": "Ma Lon Đêm Trăng", "en": "Moonlit Ghost Can" },
+        "proceduralKey": "ma_lon",
+        "dimensions": "160 × 120 px",
+        "caption": {
+          "vi": "Tiếng lon lăn leng keng giữa con hẻm khuya.",
+          "en": "A mysterious clink echoing down a quiet midnight alley."
+        }
+      }
+    ]
+  },
+  {
+    "id": "astrovert",
+    "slug": "astrovert",
+    "title": {
+      "vi": "Astrovert",
+      "en": "Astrovert"
+    },
+    "subtitle": {
+      "vi": "Phi hành gia hướng nội du hành trong vũ trụ yên tĩnh",
+      "en": "An introverted astronaut drifting through quiet galaxies"
+    },
+    "year": "2026",
+    "category": "character",
+    "status": "coming_soon",
+    "accentColor": "#60A5FA",
+    "story": [
+      {
+        "vi": "Dom đang hoàn thiện và tải lên bộ tranh Astrovert — câu chuyện của những tâm hồn hướng nội tìm thấy bình yên giữa dải ngân hà lấp lánh. Chờ chút nhé <3",
+        "en": "Dom is currently finishing and uploading Astrovert — stories of introverted souls finding calm among sparkling stars. Coming soon <3"
+      }
+    ],
+    "items": [
+      {
+        "id": "astrovert-teaser",
+        "title": { "vi": "Astrovert (Teaser)", "en": "Astrovert (Teaser)" },
+        "proceduralKey": "astrovert",
+        "dimensions": "160 × 120 px",
+        "caption": {
+          "vi": "Dom đang tải lên, chờ chút nhe <3",
+          "en": "Uploading soon — stay tuned <3"
+        }
+      }
+    ]
+  },
+  {
+    "id": "ink-the-game",
+    "slug": "ink-the-game",
+    "title": {
+      "vi": "Ink the Game",
+      "en": "Ink the Game"
+    },
+    "subtitle": {
+      "vi": "Cuộc phiêu lưu của chú mèo Ink trong thế giới game",
+      "en": "Adventures of Ink the Cat inside a pixel game world"
+    },
+    "year": "2026",
+    "category": "game",
+    "status": "coming_soon",
+    "accentColor": "#F472B6",
+    "story": [
+      {
+        "vi": "Dự án game & nhân vật Mèo Ink đang được Dom ấp ủ và tải lên dần. Bạn có thể gặp trước Mèo Ink ngay ngoài sân trước ngôi nhà này nhé!",
+        "en": "An upcoming character & game project starring Ink the Cat. You can already say hi to Ink out in the front yard of this studio!"
+      }
+    ],
+    "items": [
+      {
+        "id": "ink-teaser",
+        "title": { "vi": "Ink the Cat (Teaser)", "en": "Ink the Cat (Teaser)" },
+        "proceduralKey": "ink_the_cat",
+        "dimensions": "160 × 120 px",
+        "caption": {
+          "vi": "Dom đang tải lên, chờ chút nhe <3",
+          "en": "Uploading soon — stay tuned <3"
+        }
+      }
+    ]
+  }
+]

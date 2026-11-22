@@ -1,0 +1,48 @@
+{
+  "id": "tet",
+  "name": { "vi": "Tết Sài Gòn — Rắn Ăn Tásk", "en": "Saigon Tet — Golden Apricot" },
+  "badge": { "vi": "Mùa Tết", "en": "Lunar New Year" },
+  "description": {
+    "vi": "Mai vàng nở rộ trước sân nhà Dom, cánh hoa rơi nhẹ và câu đối đỏ đón năm mới.",
+    "en": "Golden apricot blossoms in the front yard, drifting petals, and red festive couplets."
+  },
+  "skyColor": "#1c1311",
+  "ambientOverlay": "rgba(56, 20, 12, 0.22)",
+  "spotlightColor": "rgba(255, 214, 70, 0.34)",
+  "particleType": "petals",
+  "particleCount": 32,
+  "bgmTempo": 88,
+  "extraProps": [
+    {
+      "id": "seasonal-mai-left",
+      "kind": "mai_tree",
+      "x": 8,
+      "y": 14,
+      "solid": true,
+      "label": { "vi": "Cây Mai Vàng Đón Tết", "en": "Tet Apricot Blossom Tree" },
+      "action": { "type": "artwork", "collectionId": "ran-an-task" }
+    },
+    {
+      "id": "seasonal-couplet-left",
+      "kind": "couplet",
+      "x": 10,
+      "y": 12,
+      "solid": false
+    },
+    {
+      "id": "seasonal-couplet-right",
+      "kind": "couplet",
+      "x": 13,
+      "y": 12,
+      "solid": false
+    }
+  ],
+  "npcDialogueOverrides": {
+    "task_snake": [
+      {
+        "vi": "Chúc mừng năm mới!! Năm nay vừa lau bàn ghế rồng phượng vừa ăn Tásk ngập mặt luôn nè :')",
+        "en": "Happy Lunar New Year!! Polishing furniture, cooking banh chung, and eating Tasks non-stop :')"
+      }
+    ]
+  }
+}
