@@ -69,6 +69,12 @@ export interface SiteProfile {
 
 export type Direction = 'down' | 'up' | 'left' | 'right';
 
+export type TimeOfDayMode = 'auto' | 'morning' | 'sunset' | 'night' | 'late_night';
+export type TimePeriod = 'day' | 'sunset' | 'night';
+export type CharacterAnimState = 'idle' | 'walk' | 'run' | 'sleep' | 'work' | 'gaming' | 'play';
+export type SurfaceType = 'grass' | 'stone' | 'wood' | 'carpet';
+export type MapZoneId = 'yard' | 'living_gallery' | 'studio_bedroom' | 'kitchen';
+
 export type TileType =
   | 'void'
   | 'grass'
@@ -76,12 +82,48 @@ export type TileType =
   | 'porch'
   | 'floor_wood'
   | 'floor_carpet'
+  | 'floor_kitchen'
   | 'wall_ext'
   | 'wall_ext_top'
   | 'wall_int'
   | 'wall_int_top'
   | 'door_open'
   | 'window_wall';
+
+export interface MapLayers {
+  /** Optional full-canvas hand-drawn ground PNG (e.g. "assets/game/maps/dom-house/ground.png") */
+  ground?: string;
+  /** Optional overhead layer drawn above characters (roof eaves, canopies, hanging wires) */
+  foreground?: string;
+  /** Optional hand-painted night glow layer blended when dark */
+  nightOverlay?: string;
+}
+
+export interface MapZone {
+  id: MapZoneId;
+  name: LocalizedText;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  indoor: boolean;
+}
+
+export interface MapWaypoint {
+  id: string;
+  x: number;
+  y: number;
+  facing?: Direction;
+}
+
+export interface MapLight {
+  x: number;
+  y: number;
+  radius: number;
+  color?: string;
+  flicker?: boolean;
+  onlyAtNight?: boolean;
+}
 
 export interface MapProp {
   id: string;
@@ -101,12 +143,27 @@ export interface MapProp {
     | 'lantern'
     | 'mai_tree'
     | 'couplet'
-    | 'moon_table';
+    | 'moon_table'
+    | 'bed'
+    | 'gaming_setup'
+    | 'behind_scenes_board'
+    | 'hobby_shelf'
+    | 'kitchen_counter'
+    | 'fridge'
+    | 'dining_table'
+    | 'cat_bed';
   x: number;
   y: number;
   w?: number;
   h?: number;
   solid?: boolean;
+  /** Optional sprite ID from public/assets/game/sprites/manifest.json for animated Photoshop props */
+  spriteId?: string;
+  light?: {
+    radius: number;
+    color?: string;
+    flicker?: boolean;
+  };
   label?: LocalizedText;
   action?:
     | { type: 'artwork'; collectionId: string }
@@ -118,6 +175,16 @@ export interface MapProp {
   accentColor?: string;
 }
 
+export type NpcAiRole = 'static' | 'dom_schedule' | 'cat_companion';
+
+export interface NpcScheduleDialogues {
+  sleep?: LocalizedText[];
+  work?: LocalizedText[];
+  play_cat?: LocalizedText[];
+  gaming?: LocalizedText[];
+  follow?: LocalizedText[];
+}
+
 export interface NpcEntity {
   id: string;
   name: LocalizedText;
@@ -125,7 +192,9 @@ export interface NpcEntity {
   x: number;
   y: number;
   facing: Direction;
+  aiRole?: NpcAiRole;
   dialogue: LocalizedText[];
+  scheduleDialogues?: NpcScheduleDialogues;
   actionButton?: {
     label: LocalizedText;
     actionType: 'about' | 'artwork' | 'gallery' | 'merch' | 'contact';
@@ -150,12 +219,24 @@ export interface MapDefinition {
   tileSize: number;
   spawn: { x: number; y: number; facing: Direction };
   tiles: string[];
+  layers?: MapLayers;
+  indoorRects?: Array<{ x: number; y: number; w: number; h: number }>;
+  zones?: MapZone[];
+  waypoints?: MapWaypoint[];
+  lights?: MapLight[];
   props: MapProp[];
   npcs: NpcEntity[];
   portals: MapPortal[];
 }
 
 export type SeasonId = 'default' | 'trung-thu' | 'tet';
+
+export interface SeasonAudioConfig {
+  bgmDay?: string;
+  bgmNight?: string;
+  ambientDay?: string;
+  ambientNight?: string;
+}
 
 export interface SeasonConfig {
   id: SeasonId;
@@ -168,6 +249,9 @@ export interface SeasonConfig {
   particleType: 'fireflies' | 'lanterns' | 'petals' | 'snow';
   particleCount: number;
   bgmTempo: number;
+  /** Optional transparent seasonal decoration PNG layered over the map */
+  mapOverlay?: string;
+  audio?: SeasonAudioConfig;
   extraProps: MapProp[];
   npcDialogueOverrides: Record<string, LocalizedText[]>;
 }

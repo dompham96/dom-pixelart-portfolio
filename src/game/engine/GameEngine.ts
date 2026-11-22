@@ -1,13 +1,20 @@
 import type {
+  CharacterAnimState,
   Direction,
   LocalizedText,
   MapDefinition,
   MapProp,
+  MapZone,
   NpcEntity,
   SeasonConfig,
+  SurfaceType,
+  TimeOfDayMode,
 } from '../../types/content';
 import { drawCharacter, drawProp, drawTile } from '../sprites/pixelRenderer';
+import { spriteManager } from '../sprites/SpriteManager';
 import { findPath, type GridPoint } from './Pathfinder';
+import { NpcController } from './NpcController';
+import { evaluateTimeOfDay, type TimeOfDayState } from './TimeOfDay';
 import { soundEngine } from '../../audio/SoundEngine';
 
 export type InteractionEvent =
@@ -28,31 +35,54 @@ interface Particle {
   phase: number;
 }
 
+interface DustPuff {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  ttl: number;
+  maxTtl: number;
+}
+
 const SOLID_TILES = new Set(['.', 'T', 'I', 'W', 'N']);
 
 export class GameEngine {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private lightCanvas: HTMLCanvasElement;
+  private lightCtx: CanvasRenderingContext2D | null;
+
   private map: MapDefinition;
   private season: SeasonConfig;
   private onInteract: (event: InteractionEvent) => void;
   private onNearbyChange: (prompt: NearbyPrompt | null) => void;
+  private onZoneChange?: (zone: MapZone | null) => void;
+  private onTimeStateChange?: (state: TimeOfDayState) => void;
 
   private rafId = 0;
   private lastTime = 0;
   private elapsed = 0;
   private paused = false;
 
+  // Time of day & NPC AI
+  private timeMode: TimeOfDayMode;
+  private timeState: TimeOfDayState;
+  private clockSyncCooldown = 0;
+  private npcController: NpcController;
+
   // Player state in world pixel coords (1 tile = map.tileSize = 16px)
   private playerX: number;
   private playerY: number;
   private facing: Direction;
   private walkPhase = 0;
+  private playerAnimState: CharacterAnimState = 'idle';
   private stepSoundCooldown = 0;
+  private dustCooldown = 0;
 
   // Input state
   private keys = new Set<string>();
   private virtualDir: Direction | null = null;
+  private virtualRun = false;
   private path: GridPoint[] = [];
   private pendingInteraction: InteractionEvent | null = null;
   private tapMarker: { x: number; y: number; ttl: number } | null = null;
@@ -62,37 +92,67 @@ export class GameEngine {
   private camY = 0;
   private scale = 3;
 
-  // Particles
+  // Particles & dust puffs
   private particles: Particle[] = [];
+  private dustPuffs: DustPuff[] = [];
 
-  // Nearby tracking
+  // Nearby & zone tracking
   private lastNearbyId: string | null = null;
   private currentNearby: { id: string; event: InteractionEvent; label: LocalizedText } | null = null;
+  private lastZoneId: string | null = null;
+  private lastIndoors: boolean | null = null;
 
   constructor(
     canvas: HTMLCanvasElement,
     map: MapDefinition,
     season: SeasonConfig,
+    timeMode: TimeOfDayMode,
     onInteract: (event: InteractionEvent) => void,
-    onNearbyChange: (prompt: NearbyPrompt | null) => void
+    onNearbyChange: (prompt: NearbyPrompt | null) => void,
+    onZoneChange?: (zone: MapZone | null) => void,
+    onTimeStateChange?: (state: TimeOfDayState) => void
   ) {
     this.canvas = canvas;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('2D Canvas context unavailable');
     this.ctx = ctx;
+
+    this.lightCanvas = document.createElement('canvas');
+    this.lightCanvas.width = map.width * map.tileSize;
+    this.lightCanvas.height = map.height * map.tileSize;
+    this.lightCtx = this.lightCanvas.getContext('2d');
+
     this.map = map;
     this.season = season;
+    this.timeMode = timeMode;
+    this.timeState = evaluateTimeOfDay(timeMode);
     this.onInteract = onInteract;
     this.onNearbyChange = onNearbyChange;
+    this.onZoneChange = onZoneChange;
+    this.onTimeStateChange = onTimeStateChange;
 
     this.playerX = map.spawn.x * map.tileSize;
     this.playerY = map.spawn.y * map.tileSize;
     this.facing = map.spawn.facing;
 
+    spriteManager.init();
+    this.preloadMapAssets();
+
+    this.npcController = new NpcController(map, this.timeState.domActivity);
+
     this.initParticles();
     this.resize();
     this.snapCamera();
+    this.updateZoneAndAudio();
+    this.onTimeStateChange?.(this.timeState);
     this.start();
+  }
+
+  private preloadMapAssets(): void {
+    spriteManager.preloadImage(this.map.layers?.ground);
+    spriteManager.preloadImage(this.map.layers?.foreground);
+    spriteManager.preloadImage(this.map.layers?.nightOverlay);
+    spriteManager.preloadImage(this.season.mapOverlay);
   }
 
   private getAllProps(): MapProp[] {
@@ -101,7 +161,16 @@ export class GameEngine {
 
   public setSeason(season: SeasonConfig): void {
     this.season = season;
+    spriteManager.preloadImage(season.mapOverlay);
     this.initParticles();
+    soundEngine.setEnvironment(this.season.id, this.timeState.period, Boolean(this.lastIndoors));
+  }
+
+  public setTimeMode(mode: TimeOfDayMode): void {
+    this.timeMode = mode;
+    this.timeState = evaluateTimeOfDay(mode);
+    this.onTimeStateChange?.(this.timeState);
+    soundEngine.setEnvironment(this.season.id, this.timeState.period, Boolean(this.lastIndoors));
   }
 
   public setPaused(paused: boolean): void {
@@ -120,12 +189,31 @@ export class GameEngine {
     }
   }
 
+  public setVirtualRun(running: boolean): void {
+    this.virtualRun = running;
+  }
+
   public handleKeyDown(code: string): void {
     if (this.paused) return;
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(code)) {
+    if (
+      [
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        'KeyW',
+        'KeyA',
+        'KeyS',
+        'KeyD',
+        'ShiftLeft',
+        'ShiftRight',
+      ].includes(code)
+    ) {
       this.keys.add(code);
-      this.path = [];
-      this.pendingInteraction = null;
+      if (code !== 'ShiftLeft' && code !== 'ShiftRight') {
+        this.path = [];
+        this.pendingInteraction = null;
+      }
     } else if (code === 'KeyE' || code === 'Space' || code === 'Enter') {
       this.triggerInteract();
     }
@@ -146,7 +234,6 @@ export class GameEngine {
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
 
-    // Crisp integer pixel zoom adapted for mobile portrait & desktop landscape
     const minDim = Math.min(width, height);
     const baseZoom = minDim < 520 ? 3 : minDim < 820 ? 3 : 4;
     this.scale = baseZoom * dpr;
@@ -170,7 +257,28 @@ export class GameEngine {
     }));
   }
 
-  private isTileBlocked(tx: number, ty: number): boolean {
+  private isTileIndoors(tx: number, ty: number): boolean {
+    const rects = this.map.indoorRects;
+    if (rects && rects.length > 0) {
+      return rects.some(
+        (r) => tx >= r.x && tx < r.x + r.w && ty >= r.y && ty < r.y + r.h
+      );
+    }
+    if (tx < 0 || ty < 0 || tx >= this.map.width || ty >= this.map.height) return false;
+    const ch = this.map.tiles[ty][tx];
+    return ch === 'F' || ch === 'C' || ch === 'K';
+  }
+
+  private getSurfaceAtTile(tx: number, ty: number): SurfaceType {
+    if (tx < 0 || ty < 0 || tx >= this.map.width || ty >= this.map.height) return 'wood';
+    const ch = this.map.tiles[ty][tx];
+    if (ch === 'G') return 'grass';
+    if (ch === 'P' || ch === 'K') return 'stone';
+    if (ch === 'C') return 'carpet';
+    return 'wood';
+  }
+
+  private isTileStaticSolid(tx: number, ty: number): boolean {
     if (tx < 0 || ty < 0 || tx >= this.map.width || ty >= this.map.height) return true;
     const ch = this.map.tiles[ty][tx];
     if (SOLID_TILES.has(ch)) return true;
@@ -183,17 +291,18 @@ export class GameEngine {
         return true;
       }
     }
+    return false;
+  }
 
-    for (const npc of this.map.npcs) {
-      if (npc.x === tx && npc.y === ty) return true;
-    }
-
+  private isTileBlockedForPlayer(tx: number, ty: number): boolean {
+    if (this.isTileStaticSolid(tx, ty)) return true;
+    // Only static NPCs block movement; moving Dom & Cat Ink never trap the player in doorways
+    if (this.npcController.isBlockingTile(tx, ty)) return true;
     return false;
   }
 
   private isRectBlocked(px: number, py: number): boolean {
     const ts = this.map.tileSize;
-    // Forgiving inner hitbox so walking through doorways feels buttery smooth
     const left = Math.floor((px + 3) / ts);
     const right = Math.floor((px + ts - 4) / ts);
     const top = Math.floor((py + 6) / ts);
@@ -201,7 +310,7 @@ export class GameEngine {
 
     for (let ty = top; ty <= bottom; ty++) {
       for (let tx = left; tx <= right; tx++) {
-        if (this.isTileBlocked(tx, ty)) return true;
+        if (this.isTileBlockedForPlayer(tx, ty)) return true;
       }
     }
     return false;
@@ -216,25 +325,36 @@ export class GameEngine {
 
     const worldX = canvasX / this.scale + this.camX;
     const worldY = canvasY / this.scale + this.camY;
-    const tx = Math.floor(worldX / this.map.tileSize);
-    const ty = Math.floor(worldY / this.map.tileSize);
+    const ts = this.map.tileSize;
+    const tx = Math.floor(worldX / ts);
+    const ty = Math.floor(worldY / ts);
 
     if (tx < 0 || ty < 0 || tx >= this.map.width || ty >= this.map.height) return;
 
     this.tapMarker = {
-      x: tx * this.map.tileSize + this.map.tileSize / 2,
-      y: ty * this.map.tileSize + this.map.tileSize / 2,
+      x: tx * ts + ts / 2,
+      y: ty * ts + ts / 2,
       ttl: 0.45,
     };
 
-    // Did the visitor tap an NPC or interactable prop?
+    // Check live moving NPC positions first (with forgiving 12px click radius)
     let tappedEvent: InteractionEvent | null = null;
-    const npc = this.map.npcs.find((n) => n.x === tx && n.y === ty);
-    if (npc) {
+    let targetTile = { x: tx, y: ty };
+
+    const tappedNpc = this.npcController.getRuntimeNpcs().find((r) => {
+      const dist = Math.hypot(r.px + ts / 2 - worldX, r.py + ts / 2 - worldY);
+      return dist <= ts * 0.9;
+    });
+
+    if (tappedNpc) {
+      targetTile = { x: Math.round(tappedNpc.px / ts), y: Math.round(tappedNpc.py / ts) };
       tappedEvent = {
         kind: 'npc',
-        npc,
-        dialogue: this.season.npcDialogueOverrides[npc.id] || npc.dialogue,
+        npc: tappedNpc.entity,
+        dialogue: this.npcController.getDialogueForNpc(
+          tappedNpc,
+          this.season.npcDialogueOverrides
+        ),
       };
     } else {
       const prop = this.getAllProps().find((p) => {
@@ -249,12 +369,14 @@ export class GameEngine {
     }
 
     const startTile: GridPoint = {
-      x: Math.round(this.playerX / this.map.tileSize),
-      y: Math.round(this.playerY / this.map.tileSize),
+      x: Math.round(this.playerX / ts),
+      y: Math.round(this.playerY / ts),
     };
 
-    // If already adjacent to the tapped interactable, trigger immediately!
-    if (tappedEvent && Math.abs(startTile.x - tx) + Math.abs(startTile.y - ty) <= 1) {
+    if (
+      tappedEvent &&
+      Math.abs(startTile.x - targetTile.x) + Math.abs(startTile.y - targetTile.y) <= 1
+    ) {
       this.path = [];
       this.pendingInteraction = null;
       soundEngine.playChime();
@@ -264,10 +386,10 @@ export class GameEngine {
 
     const path = findPath(
       startTile,
-      { x: tx, y: ty },
+      targetTile,
       this.map.width,
       this.map.height,
-      (x, y) => this.isTileBlocked(x, y),
+      (x, y) => this.isTileBlockedForPlayer(x, y),
       Boolean(tappedEvent)
     );
 
@@ -307,9 +429,28 @@ export class GameEngine {
     return { dx, dy };
   }
 
+  private isRunRequested(): boolean {
+    return this.virtualRun || this.keys.has('ShiftLeft') || this.keys.has('ShiftRight');
+  }
+
   private update(dt: number): void {
     this.elapsed += dt;
     this.updateParticles(dt);
+    this.updateDustPuffs(dt);
+
+    // Refresh real-time auto clock periodically
+    if (this.timeMode === 'auto') {
+      this.clockSyncCooldown -= dt;
+      if (this.clockSyncCooldown <= 0) {
+        this.clockSyncCooldown = 15;
+        const next = evaluateTimeOfDay('auto');
+        if (next.clockText !== this.timeState.clockText) {
+          this.timeState = next;
+          this.onTimeStateChange?.(next);
+          soundEngine.setEnvironment(this.season.id, next.period, Boolean(this.lastIndoors));
+        }
+      }
+    }
 
     if (this.tapMarker) {
       this.tapMarker.ttl -= dt;
@@ -318,7 +459,8 @@ export class GameEngine {
 
     if (this.paused) return;
 
-    const speed = 64; // 4 tiles/sec
+    const wantRun = this.isRunRequested();
+    const speed = wantRun ? 106 : 64;
     let isMoving = false;
     const { dx, dy } = this.getKeyboardVector();
 
@@ -372,19 +514,82 @@ export class GameEngine {
       }
     }
 
+    const isRunningNow = isMoving && wantRun;
+    this.playerAnimState = isRunningNow ? 'run' : isMoving ? 'walk' : 'idle';
+
+    const ptx = Math.floor((this.playerX + this.map.tileSize / 2) / this.map.tileSize);
+    const pty = Math.floor((this.playerY + this.map.tileSize / 2) / this.map.tileSize);
+
     if (isMoving) {
-      this.walkPhase += dt;
+      this.walkPhase += dt * (isRunningNow ? 1.4 : 1);
       this.stepSoundCooldown -= dt;
       if (this.stepSoundCooldown <= 0) {
-        soundEngine.playStep();
-        this.stepSoundCooldown = 0.28;
+        const surface = this.getSurfaceAtTile(ptx, pty);
+        soundEngine.playStep(surface, isRunningNow);
+        this.stepSoundCooldown = isRunningNow ? 0.19 : 0.28;
+      }
+      if (isRunningNow) {
+        this.dustCooldown -= dt;
+        if (this.dustCooldown <= 0) {
+          this.dustCooldown = 0.13;
+          this.dustPuffs.push({
+            x: this.playerX + 8 + (Math.random() - 0.5) * 4,
+            y: this.playerY + 14,
+            vx: (Math.random() - 0.5) * 8,
+            vy: -(4 + Math.random() * 6),
+            ttl: 0.35,
+            maxTtl: 0.35,
+          });
+        }
       }
     } else {
       this.walkPhase = 0;
     }
 
+    // Update indoor zone & sound environment
+    const playerIndoors = this.updateZoneAndAudio();
+
+    // Update Dom's daily schedule & Cat Ink's companion AI
+    this.npcController.update({
+      dt,
+      domActivity: this.timeState.domActivity,
+      playerX: this.playerX,
+      playerY: this.playerY,
+      playerIndoors,
+      playerIsRunning: isRunningNow,
+      isTileSolidForNpc: (tx, ty) => this.isTileStaticSolid(tx, ty),
+      isTileIndoors: (tx, ty) => this.isTileIndoors(tx, ty),
+      onCatMeow: () => soundEngine.playMeow(),
+    });
+
     this.updateCamera(dt);
     this.updateNearbyInteractable();
+  }
+
+  private updateZoneAndAudio(): boolean {
+    const ts = this.map.tileSize;
+    const ptx = Math.floor((this.playerX + ts / 2) / ts);
+    const pty = Math.floor((this.playerY + ts / 2) / ts);
+    const indoors = this.isTileIndoors(ptx, pty);
+
+    if (this.lastIndoors !== indoors) {
+      this.lastIndoors = indoors;
+      soundEngine.setEnvironment(this.season.id, this.timeState.period, indoors);
+    }
+
+    if (this.map.zones && this.map.zones.length > 0) {
+      const zone =
+        this.map.zones.find(
+          (z) => ptx >= z.x && ptx < z.x + z.w && pty >= z.y && pty < z.y + z.h
+        ) || null;
+      const nextId = zone ? zone.id : null;
+      if (nextId !== this.lastZoneId) {
+        this.lastZoneId = nextId;
+        this.onZoneChange?.(zone);
+      }
+    }
+
+    return indoors;
   }
 
   private updateParticles(dt: number): void {
@@ -399,6 +604,18 @@ export class GameEngine {
       if (p.x > worldW) p.x -= worldW;
       if (p.y < 0) p.y += worldH;
       if (p.y > worldH) p.y -= worldH;
+    }
+  }
+
+  private updateDustPuffs(dt: number): void {
+    for (let i = this.dustPuffs.length - 1; i >= 0; i--) {
+      const d = this.dustPuffs[i];
+      d.ttl -= dt;
+      d.x += d.vx * dt;
+      d.y += d.vy * dt;
+      if (d.ttl <= 0) {
+        this.dustPuffs.splice(i, 1);
+      }
     }
   }
 
@@ -437,20 +654,23 @@ export class GameEngine {
     const pCy = this.playerY + ts / 2;
 
     let best: { id: string; dist: number; event: InteractionEvent; label: LocalizedText } | null = null;
-    const maxDist = ts * 1.65;
+    const maxDist = ts * 1.75;
 
-    for (const npc of this.map.npcs) {
-      const dist = Math.hypot(npc.x * ts + ts / 2 - pCx, npc.y * ts + ts / 2 - pCy);
+    for (const runtime of this.npcController.getRuntimeNpcs()) {
+      const dist = Math.hypot(runtime.px + ts / 2 - pCx, runtime.py + ts / 2 - pCy);
       if (dist <= maxDist && (!best || dist < best.dist)) {
         best = {
-          id: `npc:${npc.id}`,
+          id: `npc:${runtime.entity.id}`,
           dist,
           event: {
             kind: 'npc',
-            npc,
-            dialogue: this.season.npcDialogueOverrides[npc.id] || npc.dialogue,
+            npc: runtime.entity,
+            dialogue: this.npcController.getDialogueForNpc(
+              runtime,
+              this.season.npcDialogueOverrides
+            ),
           },
-          label: npc.name,
+          label: runtime.entity.name,
         };
       }
     }
@@ -484,26 +704,33 @@ export class GameEngine {
   private render(): void {
     const ctx = this.ctx;
     const ts = this.map.tileSize;
+    const worldW = this.map.width * ts;
+    const worldH = this.map.height * ts;
 
     ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = this.season.skyColor;
+    ctx.fillStyle = this.timeState.period === 'day' ? this.timeState.skyColor : this.season.skyColor;
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     ctx.save();
     ctx.scale(this.scale, this.scale);
     ctx.translate(-Math.round(this.camX), -Math.round(this.camY));
 
-    // 1. Base tiles
-    for (let y = 0; y < this.map.height; y++) {
-      const row = this.map.tiles[y];
-      for (let x = 0; x < this.map.width; x++) {
-        drawTile(ctx, row[x], x * ts, y * ts, ts);
+    // 1. Base map layer: prefer full-canvas hand-drawn Photoshop PNG, fallback to tile grid
+    const groundImg = spriteManager.getImage(this.map.layers?.ground);
+    if (groundImg) {
+      ctx.drawImage(groundImg, 0, 0, worldW, worldH);
+    } else {
+      for (let y = 0; y < this.map.height; y++) {
+        const row = this.map.tiles[y];
+        for (let x = 0; x < this.map.width; x++) {
+          drawTile(ctx, row[x], x * ts, y * ts, ts);
+        }
       }
     }
 
     // 2. Tap destination indicator
     if (this.tapMarker) {
-      ctx.strokeStyle = 'rgba(255, 207, 61, 0.8)';
+      ctx.strokeStyle = 'rgba(255, 207, 61, 0.85)';
       ctx.lineWidth = 1;
       const r = 3 + (0.45 - this.tapMarker.ttl) * 8;
       ctx.strokeRect(
@@ -514,41 +741,49 @@ export class GameEngine {
       );
     }
 
-    // 3. Y-sorted props, NPCs, and Player for natural top-down depth
+    // 2.5 Running pixel dust puffs behind characters
+    for (const d of this.dustPuffs) {
+      const alpha = Math.max(0, d.ttl / d.maxTtl) * 0.65;
+      ctx.fillStyle = `rgba(245, 239, 230, ${alpha.toFixed(2)})`;
+      ctx.fillRect(Math.round(d.x), Math.round(d.y), 2, 2);
+    }
+
+    // 3. Y-sorted props, dynamic NPCs, and Player for natural top-down depth
     type RenderItem = { sortY: number; draw: () => void };
     const drawList: RenderItem[] = [];
 
     for (const prop of this.getAllProps()) {
       const isNearby = this.currentNearby?.id === `prop:${prop.id}`;
+      // Bed and cat cushion render slightly behind characters standing/sleeping on them
+      const yOffset =
+        prop.kind === 'art_frame' || prop.kind === 'behind_scenes_board' || prop.kind === 'bed' || prop.kind === 'cat_bed'
+          ? -3
+          : 0;
       drawList.push({
-        sortY: prop.y * ts + (prop.kind === 'art_frame' ? -2 : 0),
+        sortY: prop.y * ts + yOffset,
         draw: () => drawProp(ctx, prop, ts, this.elapsed, isNearby),
       });
     }
 
-    for (const npc of this.map.npcs) {
-      const isNearby = this.currentNearby?.id === `npc:${npc.id}`;
+    for (const runtime of this.npcController.getRuntimeNpcs()) {
+      const isNearby = this.currentNearby?.id === `npc:${runtime.entity.id}`;
       drawList.push({
-        sortY: npc.y * ts,
+        sortY: runtime.py,
         draw: () =>
           drawCharacter(
             ctx,
-            npc.spriteKey,
-            npc.x * ts,
-            npc.y * ts,
-            npc.facing,
-            0,
-            false,
+            runtime.entity.spriteKey,
+            Math.round(runtime.px),
+            Math.round(runtime.py),
+            runtime.facing,
+            runtime.walkPhase,
+            runtime.animState,
             isNearby,
-            this.elapsed
+            this.elapsed,
+            runtime.emote
           ),
       });
     }
-
-    const isMoving =
-      this.path.length > 0 ||
-      this.virtualDir !== null ||
-      this.keys.size > 0;
 
     drawList.push({
       sortY: this.playerY,
@@ -560,7 +795,7 @@ export class GameEngine {
           Math.round(this.playerY),
           this.facing,
           this.walkPhase,
-          isMoving,
+          this.playerAnimState,
           false,
           this.elapsed
         ),
@@ -569,43 +804,174 @@ export class GameEngine {
     drawList.sort((a, b) => a.sortY - b.sortY);
     for (const item of drawList) item.draw();
 
-    // 4. Warm gallery spotlights & streetlamp pools
-    this.renderLighting(ctx, ts);
+    // 4. Optional hand-drawn overhead foreground layer (roof eaves, canopies) & seasonal overlay
+    const fgImg = spriteManager.getImage(this.map.layers?.foreground);
+    if (fgImg) {
+      ctx.drawImage(fgImg, 0, 0, worldW, worldH);
+    }
+    const seasonOverlay = spriteManager.getImage(this.season.mapOverlay);
+    if (seasonOverlay) {
+      ctx.drawImage(seasonOverlay, 0, 0, worldW, worldH);
+    }
 
-    // 5. Seasonal particles
+    // 5. Dynamic Day/Night Offscreen Lightmap + Warm Spotlights
+    this.renderDynamicLighting(ctx, ts, worldW, worldH);
+
+    // 6. Seasonal particles (fireflies fade out cleanly in bright daylight)
     this.renderParticles(ctx);
 
     ctx.restore();
 
-    // 6. Subtle seasonal ambient tint
-    ctx.fillStyle = this.season.ambientOverlay;
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    // 7. Subtle seasonal atmosphere tint (softened in bright daytime)
+    if (this.timeState.period !== 'day') {
+      ctx.fillStyle = this.season.ambientOverlay;
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
   }
 
-  private renderLighting(ctx: CanvasRenderingContext2D, ts: number): void {
-    const lights: Array<{ x: number; y: number; r: number }> = [];
+  private collectLights(ts: number): Array<{
+    x: number;
+    y: number;
+    r: number;
+    color: string;
+    activeWeight: number;
+  }> {
+    const nightWeight = this.timeState.lightIntensity;
+    const lights: Array<{ x: number; y: number; r: number; color: string; activeWeight: number }> = [];
+
     for (const prop of this.getAllProps()) {
       if (prop.kind === 'art_frame') {
-        lights.push({ x: prop.x * ts + 8, y: prop.y * ts + 14, r: 22 });
+        lights.push({
+          x: prop.x * ts + 8,
+          y: prop.y * ts + 14,
+          r: 22,
+          color: this.season.spotlightColor,
+          activeWeight: Math.max(0.35, nightWeight),
+        });
       } else if (prop.kind === 'lamp_post' || prop.kind === 'lantern') {
-        lights.push({ x: prop.x * ts + 8, y: prop.y * ts + 6, r: 34 });
+        const flicker = 1 + Math.sin(this.elapsed * 5.2 + prop.x * 3) * 0.06;
+        lights.push({
+          x: prop.x * ts + 8,
+          y: prop.y * ts + 6,
+          r: (prop.light?.radius || 36) * flicker,
+          color: prop.light?.color || this.season.spotlightColor,
+          activeWeight: nightWeight,
+        });
+      } else if (prop.light) {
+        const flicker = prop.light.flicker ? 1 + Math.sin(this.elapsed * 5 + prop.x) * 0.06 : 1;
+        lights.push({
+          x: prop.x * ts + ((prop.w || 1) * ts) / 2,
+          y: prop.y * ts + ((prop.h || 1) * ts) / 2,
+          r: prop.light.radius * flicker,
+          color: prop.light.color || this.season.spotlightColor,
+          activeWeight: nightWeight,
+        });
       }
     }
-    // Warm indoor doorway spill
-    lights.push({ x: 12 * ts, y: 12.5 * ts, r: 28 });
 
+    for (const ml of this.map.lights || []) {
+      const flicker = ml.flicker ? 1 + Math.sin(this.elapsed * 5 + ml.x) * 0.06 : 1;
+      const weight = ml.onlyAtNight === false ? Math.max(0.45, nightWeight) : nightWeight;
+      lights.push({
+        x: ml.x * ts,
+        y: ml.y * ts,
+        r: ml.radius * flicker,
+        color: ml.color || this.season.spotlightColor,
+        activeWeight: weight,
+      });
+    }
+
+    return lights;
+  }
+
+  private renderDynamicLighting(
+    ctx: CanvasRenderingContext2D,
+    ts: number,
+    worldW: number,
+    worldH: number
+  ): void {
+    const lights = this.collectLights(ts);
+    const { outdoorTint, indoorTint, sunlightAlpha } = this.timeState;
+
+    // 1. Offscreen lightmap splits outdoor darkness vs warm cozy indoor rooms
+    if (this.lightCtx && outdoorTint.a > 0.03) {
+      const lctx = this.lightCtx;
+      lctx.globalCompositeOperation = 'source-over';
+      lctx.clearRect(0, 0, worldW, worldH);
+
+      // Base outdoor atmospheric shade
+      lctx.fillStyle = `rgba(${outdoorTint.r}, ${outdoorTint.g}, ${outdoorTint.b}, ${outdoorTint.a})`;
+      lctx.fillRect(0, 0, worldW, worldH);
+
+      // Keep indoor rooms warmly lit and clearer than the night courtyard
+      for (const rect of this.map.indoorRects || []) {
+        lctx.clearRect(rect.x * ts, rect.y * ts, rect.w * ts, rect.h * ts);
+        lctx.fillStyle = `rgba(${indoorTint.r}, ${indoorTint.g}, ${indoorTint.b}, ${indoorTint.a})`;
+        lctx.fillRect(rect.x * ts, rect.y * ts, rect.w * ts, rect.h * ts);
+      }
+
+      // Carve soft light holes around active lamps, windows & gallery track lights
+      lctx.globalCompositeOperation = 'destination-out';
+      for (const l of lights) {
+        if (l.activeWeight <= 0.05) continue;
+        const grad = lctx.createRadialGradient(l.x, l.y, 2, l.x, l.y, l.r);
+        grad.addColorStop(0, `rgba(0, 0, 0, ${(0.88 * l.activeWeight).toFixed(2)})`);
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        lctx.fillStyle = grad;
+        lctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+      }
+
+      ctx.drawImage(this.lightCanvas, 0, 0);
+    }
+
+    // 2. Soft golden warm glow halos on top of active lamps & frames
     for (const l of lights) {
+      if (l.activeWeight <= 0.08) continue;
+      ctx.save();
+      ctx.globalAlpha = l.activeWeight;
       const grad = ctx.createRadialGradient(l.x, l.y, 2, l.x, l.y, l.r);
-      grad.addColorStop(0, this.season.spotlightColor);
+      grad.addColorStop(0, l.color);
       grad.addColorStop(1, 'rgba(255, 207, 61, 0)');
       ctx.fillStyle = grad;
       ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+      ctx.restore();
+    }
+
+    // 3. Gentle daytime window sunbeams inside the studio house
+    if (sunlightAlpha > 0.05) {
+      ctx.save();
+      ctx.fillStyle = `rgba(255, 238, 178, ${(0.11 * sunlightAlpha).toFixed(3)})`;
+      for (const rect of this.map.indoorRects || []) {
+        ctx.beginPath();
+        const sx = (rect.x + 1) * ts;
+        const sy = (rect.y + rect.h - 2) * ts;
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(sx + 26, sy);
+        ctx.lineTo(sx + 38, sy + 20);
+        ctx.lineTo(sx + 10, sy + 20);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // 4. Optional hand-painted night glow overlay from Photoshop
+    const nightOverlay = spriteManager.getImage(this.map.layers?.nightOverlay);
+    if (nightOverlay && this.timeState.lightIntensity > 0.1) {
+      ctx.save();
+      ctx.globalAlpha = this.timeState.lightIntensity;
+      ctx.drawImage(nightOverlay, 0, 0, worldW, worldH);
+      ctx.restore();
     }
   }
 
   private renderParticles(ctx: CanvasRenderingContext2D): void {
+    const isFireflies = this.season.particleType === 'fireflies';
+    const visibility = isFireflies ? this.timeState.fireflyAlpha : 1;
+    if (visibility <= 0.04) return;
+
     for (const p of this.particles) {
-      const alpha = 0.45 + 0.45 * Math.sin(p.phase);
+      const alpha = (0.45 + 0.45 * Math.sin(p.phase)) * visibility;
       if (this.season.particleType === 'fireflies') {
         ctx.fillStyle = `rgba(255, 214, 92, ${alpha.toFixed(2)})`;
       } else if (this.season.particleType === 'lanterns') {

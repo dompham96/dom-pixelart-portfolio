@@ -8,8 +8,13 @@ import {
   VolumeX,
   Home,
   Sparkles,
+  Sun,
+  Sunset,
+  Moon,
+  Clock,
 } from 'lucide-react';
 import type { Locale, SeasonConfig, SeasonId } from '../types/content';
+import type { TimeOfDayState } from '../game/engine/TimeOfDay';
 import { seasonList } from '../data';
 
 export type AppMode = 'title' | 'game' | 'gallery';
@@ -18,6 +23,7 @@ interface TopHudProps {
   mode: AppMode;
   locale: Locale;
   season: SeasonConfig;
+  timeState: TimeOfDayState;
   audioEnabled: boolean;
   showDpad: boolean;
   onChangeMode: (mode: AppMode) => void;
@@ -28,12 +34,14 @@ interface TopHudProps {
   onToggleAudio: () => void;
   onToggleDpad: () => void;
   onChangeSeason: (id: SeasonId) => void;
+  onCycleTimeMode: () => void;
 }
 
 export function TopHud({
   mode,
   locale,
   season,
+  timeState,
   audioEnabled,
   showDpad,
   onChangeMode,
@@ -44,11 +52,19 @@ export function TopHud({
   onToggleAudio,
   onToggleDpad,
   onChangeSeason,
+  onCycleTimeMode,
 }: TopHudProps) {
   const nextSeason = () => {
     const idx = seasonList.findIndex((s) => s.id === season.id);
     const next = seasonList[(idx + 1) % seasonList.length];
     onChangeSeason(next.id);
+  };
+
+  const renderTimeIcon = () => {
+    if (timeState.mode === 'auto') return <Clock className="h-3.5 w-3.5 text-[#FFCF3D]" />;
+    if (timeState.period === 'day') return <Sun className="h-3.5 w-3.5 text-[#FFCF3D]" />;
+    if (timeState.period === 'sunset') return <Sunset className="h-3.5 w-3.5 text-[#E88D4F]" />;
+    return <Moon className="h-3.5 w-3.5 text-[#93C5FD]" />;
   };
 
   return (
@@ -136,10 +152,27 @@ export function TopHud({
           </button>
         </nav>
 
-        {/* Right utilities: Season, D-Pad (in game mode), Lang, Audio */}
+        {/* Right utilities: Time of Day, Season, D-Pad (in game mode), Lang, Audio */}
         <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           {mode === 'game' && (
             <>
+              <button
+                id="hud-time-btn"
+                type="button"
+                onClick={onCycleTimeMode}
+                className="pixel-btn flex items-center gap-1 whitespace-nowrap px-1.5 py-1.5 text-[11px] sm:px-2 sm:text-xs"
+                title={
+                  locale === 'vi'
+                    ? 'Đổi giờ Ngày/Đêm & lịch sinh hoạt của Dom'
+                    : 'Switch Day/Night & Dom daily schedule'
+                }
+                aria-label="Switch time of day"
+              >
+                {renderTimeIcon()}
+                <span className="font-mono-code hidden lg:inline">{timeState.label[locale]}</span>
+                <span className="font-mono-code lg:hidden">{timeState.clockText}</span>
+              </button>
+
               <button
                 id="hud-season-btn"
                 type="button"
@@ -149,7 +182,7 @@ export function TopHud({
                 aria-label="Switch season"
               >
                 <Sparkles className="h-3.5 w-3.5 text-[#FFCF3D]" />
-                <span className="hidden lg:inline">{season.badge[locale]}</span>
+                <span className="hidden xl:inline">{season.badge[locale]}</span>
               </button>
 
               <button

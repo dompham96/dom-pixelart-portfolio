@@ -70,6 +70,31 @@ const validateProps = (props, sourceName) => {
 
 validateProps(map.props, 'map');
 
+for (const rect of map.indoorRects || []) {
+  if (rect.x < 0 || rect.y < 0 || rect.x + rect.w > map.width || rect.y + rect.h > map.height) {
+    errors.push(`Map indoorRect out of bounds: (${rect.x},${rect.y},${rect.w},${rect.h})`);
+  }
+}
+
+for (const zone of map.zones || []) {
+  checkLocalized(zone.name, `map.zones[${zone.id}].name`);
+  if (zone.x < 0 || zone.y < 0 || zone.x + zone.w > map.width || zone.y + zone.h > map.height) {
+    errors.push(`Map zone ${zone.id} out of bounds`);
+  }
+}
+
+for (const wp of map.waypoints || []) {
+  if (wp.x < 0 || wp.x >= map.width || wp.y < 0 || wp.y >= map.height) {
+    errors.push(`Map waypoint ${wp.id} out of bounds (${wp.x},${wp.y})`);
+  }
+}
+
+for (const light of map.lights || []) {
+  if (light.x < 0 || light.x > map.width || light.y < 0 || light.y > map.height) {
+    errors.push(`Map light out of bounds (${light.x},${light.y})`);
+  }
+}
+
 const npcIds = new Set(map.npcs.map((n) => n.id));
 for (const npc of map.npcs) {
   checkLocalized(npc.name, `npc[${npc.id}].name`);

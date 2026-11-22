@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
-import type { ArtworkCollection, Locale, SeasonId } from './types/content';
+import type { ArtworkCollection, Locale, SeasonId, TimeOfDayMode } from './types/content';
 import { DEFAULT_ACTIVE_SEASON, getCollectionById, seasons } from './data';
 import { soundEngine } from './audio/SoundEngine';
+import { evaluateTimeOfDay, TIME_MODE_ORDER, type TimeOfDayState } from './game/engine/TimeOfDay';
 import { TitleScreen } from './components/TitleScreen';
 import { TopHud, type AppMode } from './components/TopHud';
 import { GameView } from './components/GameView';
@@ -22,6 +23,8 @@ export function App() {
   const [mode, setMode] = useState<AppMode>('title');
   const [locale, setLocale] = useState<Locale>('vi');
   const [seasonId, setSeasonId] = useState<SeasonId>(DEFAULT_ACTIVE_SEASON);
+  const [timeMode, setTimeMode] = useState<TimeOfDayMode>('auto');
+  const [timeState, setTimeState] = useState<TimeOfDayState>(() => evaluateTimeOfDay('auto'));
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [showDpad, setShowDpad] = useState(false);
 
@@ -40,6 +43,13 @@ export function App() {
   const handleChangeSeason = (id: SeasonId) => {
     setSeasonId(id);
     soundEngine.setTempo(seasons[id].bgmTempo);
+  };
+
+  const handleCycleTimeMode = () => {
+    const idx = TIME_MODE_ORDER.indexOf(timeMode);
+    const next = TIME_MODE_ORDER[(idx + 1) % TIME_MODE_ORDER.length];
+    setTimeMode(next);
+    setTimeState(evaluateTimeOfDay(next));
   };
 
   const handleStartGame = () => {
@@ -135,6 +145,7 @@ export function App() {
             mode={mode}
             locale={locale}
             season={currentSeason}
+            timeState={timeState}
             audioEnabled={audioEnabled}
             showDpad={showDpad}
             onChangeMode={(next) => {
@@ -149,15 +160,18 @@ export function App() {
             onToggleAudio={handleToggleAudio}
             onToggleDpad={() => setShowDpad((v) => !v)}
             onChangeSeason={handleChangeSeason}
+            onCycleTimeMode={handleCycleTimeMode}
           />
 
           {mode === 'game' ? (
             <GameView
               locale={locale}
               season={currentSeason}
+              timeMode={timeMode}
               paused={isGamePaused}
               showDpad={showDpad}
               onInteract={handleGameInteract}
+              onTimeStateChange={setTimeState}
             />
           ) : (
             <QuickGallery

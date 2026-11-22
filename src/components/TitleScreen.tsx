@@ -77,13 +77,12 @@ export function TitleScreen({
         drawProp(ctx, prop, ts, t, false);
       }
 
-      // Soft warm glow from front windows & streetlamps
-      const glows = [
-        [4.5 * ts, 12.5 * ts, 36],
-        [18.5 * ts, 12.5 * ts, 36],
-        [12 * ts, 12.5 * ts, 40],
-        [9.5 * ts, 13.5 * ts, 34],
-        [14.5 * ts, 16.5 * ts, 34],
+      // Soft warm glow from map windows & streetlamps
+      const glows: Array<[number, number, number]> = [
+        ...(domHouseMap.lights || []).map((l) => [l.x * ts, l.y * ts, l.radius] as [number, number, number]),
+        ...domHouseMap.props
+          .filter((p) => p.kind === 'lamp_post')
+          .map((p) => [p.x * ts + 8, p.y * ts + 6, 34] as [number, number, number]),
       ];
       for (const [gx, gy, gr] of glows) {
         const grad = ctx.createRadialGradient(gx, gy, 2, gx, gy, gr);

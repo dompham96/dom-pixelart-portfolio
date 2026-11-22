@@ -1,20 +1,24 @@
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Hand } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Hand, Zap } from 'lucide-react';
 import type { Direction, Locale } from '../types/content';
 import type { NearbyPrompt } from '../game/engine/GameEngine';
 
 interface MobileControlsProps {
   locale: Locale;
   showDpad: boolean;
+  isRunning: boolean;
   nearby: NearbyPrompt | null;
   onDirectionChange: (dir: Direction | null) => void;
+  onToggleRun: () => void;
   onInteract: () => void;
 }
 
 export function MobileControls({
   locale,
   showDpad,
+  isRunning,
   nearby,
   onDirectionChange,
+  onToggleRun,
   onInteract,
 }: MobileControlsProps) {
   const bindHold = (dir: Direction) => ({
@@ -39,9 +43,7 @@ export function MobileControls({
             className="pixel-btn pixel-btn-primary pointer-events-auto flex items-center gap-2 px-4 py-2.5 text-sm font-bold sm:text-base"
           >
             <Hand className="h-4 w-4" />
-            <span>
-              {nearby.label[locale]}
-            </span>
+            <span>{nearby.label[locale]}</span>
             <span className="font-mono-code hidden border border-[#131211]/40 px-1.5 py-0.5 text-[10px] sm:inline">
               E
             </span>
@@ -49,7 +51,7 @@ export function MobileControls({
         </div>
       )}
 
-      {/* Optional Virtual D-Pad + Interact A Button */}
+      {/* Optional Virtual D-Pad + Run & Interact A Buttons */}
       {showDpad && (
         <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex items-end justify-between px-4 sm:bottom-6 sm:px-8">
           {/* Classic Cross D-Pad */}
@@ -95,19 +97,33 @@ export function MobileControls({
             <div />
           </div>
 
-          {/* Action Button A */}
-          <button
-            type="button"
-            onClick={onInteract}
-            disabled={!nearby}
-            className={`pixel-btn pointer-events-auto flex h-16 w-16 flex-col items-center justify-center text-sm font-bold ${
-              nearby ? 'pixel-btn-primary' : 'opacity-45'
-            }`}
-            aria-label="Interact"
-          >
-            <span>A</span>
-            <span className="text-[10px]">{locale === 'vi' ? 'XEM' : 'ACT'}</span>
-          </button>
+          {/* Right Action Cluster: RUN toggle + Action Button A */}
+          <div className="pointer-events-auto flex items-end gap-2">
+            <button
+              type="button"
+              onClick={onToggleRun}
+              className={`pixel-btn flex h-12 w-12 flex-col items-center justify-center text-[10px] font-bold ${
+                isRunning ? 'border-[#FFCF3D] bg-[#FFCF3D]/20 text-[#FFCF3D]' : 'bg-[#1C1B19]/90'
+              }`}
+              aria-label="Toggle Run"
+            >
+              <Zap className="h-3.5 w-3.5" />
+              <span>{locale === 'vi' ? 'CHẠY' : 'RUN'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onInteract}
+              disabled={!nearby}
+              className={`pixel-btn flex h-16 w-16 flex-col items-center justify-center text-sm font-bold ${
+                nearby ? 'pixel-btn-primary' : 'opacity-45'
+              }`}
+              aria-label="Interact"
+            >
+              <span>A</span>
+              <span className="text-[10px]">{locale === 'vi' ? 'XEM' : 'ACT'}</span>
+            </button>
+          </div>
         </div>
       )}
     </>

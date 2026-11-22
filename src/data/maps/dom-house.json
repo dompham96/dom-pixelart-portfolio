@@ -4,35 +4,99 @@
     "vi": "Nhà Studio của Dom",
     "en": "Dom's Cozy Studio House"
   },
-  "width": 24,
-  "height": 20,
+  "width": 30,
+  "height": 24,
   "tileSize": 16,
   "spawn": {
-    "x": 11,
-    "y": 18,
+    "x": 10,
+    "y": 21,
     "facing": "up"
   },
   "tiles": [
-    "........................",
-    "..TTTTTTTTTTTTTTTTTTTT..",
-    "..TIIIIIIIIIIIIIIIIIIT..",
-    "..TFFFFFFFFFFFFFFFFFFT..",
-    "..TFFCCCCCCCCCCCCCCFFT..",
-    "..TFCFFFFFFFFFFFFFFCFT..",
-    "..TFCFFFFFFFFFFFFFFCFT..",
-    "..TFCFFFFFFFFFFFFFFCFT..",
-    "..TFCFFCCCCCCCCCCFFCFT..",
-    "..TFCFFCCCCCCCCCCFFCFT..",
-    "..TFFFFFFFFFFFFFFFFFFT..",
-    "..TFFFFFFFFFFFFFFFFFFT..",
-    "..WWNNWWWWWDDWWWWWNNWW..",
-    "..GGGGGGGGOOOOGGGGGGGG..",
-    "..GGGGGGGGGPPGGGGGGGGG..",
-    "..GGGGGGGGGPPGGGGGGGGG..",
-    "..GGGGGGGGGPPGGGGGGGGG..",
-    "..GGGGGGGGGPPPPPPPPPPG..",
-    "..GGGGGGGGGPPGGGGGGGGG..",
-    "........................"
+    "..............................",
+    "..TTTTTTTTTTTTTTTTTTTTTTTTTT..",
+    "..TIIIIIIIIIIIIIIITIIIIIIIIT..",
+    "..TFFFFFFFFFFFFFFFTFFFFFFFFT..",
+    "..TFFCCCCCCCCCCCFFTFFFFFFFFT..",
+    "..TFCFFFFFFFFFFFCFTFFFFFFFFT..",
+    "..TFCFFFFFFFFFFFCFDFFFFFFFFT..",
+    "..TFCFFFFFFFFFFFCFDFFFFFFFFT..",
+    "..TFCFFCCCCCCCFFCFTFFFFFFFFT..",
+    "..TFCFFCCCCCCCFFCFTFFFFFFFFT..",
+    "..TFFFFFFFFFFFFFFFTIIDDIIIIT..",
+    "..TFFFFFFFFFFFFFFFTKKKKKKKKT..",
+    "..TFFFFFFFFFFFFFFFDKKKKKKKKT..",
+    "..TFFFFFFFFFFFFFFFDKKKKKKKKT..",
+    "..TFFFFFFFFFFFFFFFTKKKKKKKKT..",
+    "..WWNNWWWWDDWWWWWWWWWNNWWNNW..",
+    "..GGGGGGGOOOOGGGGGGGGGGGGGGG..",
+    "..GGGGGGGGPPGGGGGGGGGGGGGGGG..",
+    "..GGGGGGGGPPGGGGGGGGGGGGGGGG..",
+    "..GGGGGGGGPPGGGGGGGGGGGGGGGG..",
+    "..GGGGGGGGPPPPPPPPPPPPPPPPGG..",
+    "..GGGGGGGGPPGGGGGGGGGGGGGGGG..",
+    "..GGGGGGGGPPGGGGGGGGGGGGGGGG..",
+    ".............................."
+  ],
+  "indoorRects": [
+    { "x": 3, "y": 2, "w": 16, "h": 13 },
+    { "x": 19, "y": 2, "w": 8, "h": 9 },
+    { "x": 19, "y": 11, "w": 8, "h": 4 }
+  ],
+  "zones": [
+    {
+      "id": "yard",
+      "name": { "vi": "Sân ngoài trời", "en": "Front Courtyard" },
+      "x": 2,
+      "y": 16,
+      "w": 26,
+      "h": 7,
+      "indoor": false
+    },
+    {
+      "id": "living_gallery",
+      "name": { "vi": "Phòng khách — Triển lãm", "en": "Living Room Gallery" },
+      "x": 3,
+      "y": 2,
+      "w": 16,
+      "h": 13,
+      "indoor": true
+    },
+    {
+      "id": "studio_bedroom",
+      "name": { "vi": "Phòng làm việc & Phòng ngủ", "en": "Studio & Bedroom" },
+      "x": 19,
+      "y": 2,
+      "w": 8,
+      "h": 9,
+      "indoor": true
+    },
+    {
+      "id": "kitchen",
+      "name": { "vi": "Bếp & Góc sinh hoạt", "en": "Kitchen & Cozy Nook" },
+      "x": 19,
+      "y": 11,
+      "w": 8,
+      "h": 4,
+      "indoor": true
+    }
+  ],
+  "waypoints": [
+    { "id": "dom_bed", "x": 25, "y": 3, "facing": "down" },
+    { "id": "dom_desk", "x": 21, "y": 5, "facing": "up" },
+    { "id": "dom_game", "x": 24, "y": 8, "facing": "up" },
+    { "id": "cat_play", "x": 21, "y": 8, "facing": "left" },
+    { "id": "cat_nap", "x": 25, "y": 14, "facing": "down" },
+    { "id": "door_entry", "x": 10, "y": 14, "facing": "down" }
+  ],
+  "lights": [
+    { "x": 4.5, "y": 15.5, "radius": 34, "onlyAtNight": true },
+    { "x": 21.5, "y": 15.5, "radius": 34, "onlyAtNight": true },
+    { "x": 25.5, "y": 15.5, "radius": 34, "onlyAtNight": true },
+    { "x": 11.0, "y": 15.3, "radius": 36, "onlyAtNight": true },
+    { "x": 21.0, "y": 4.4, "radius": 28, "onlyAtNight": false },
+    { "x": 25.0, "y": 7.4, "radius": 28, "color": "rgba(192, 132, 252, 0.28)", "onlyAtNight": false },
+    { "x": 24.0, "y": 11.8, "radius": 30, "onlyAtNight": true }
   ],
   "props": [
     {
@@ -48,7 +112,7 @@
     {
       "id": "frame-trungthu",
       "kind": "art_frame",
-      "x": 7,
+      "x": 6,
       "y": 2,
       "solid": true,
       "accentColor": "#FFAE33",
@@ -58,7 +122,7 @@
     {
       "id": "frame-mamment",
       "kind": "art_frame",
-      "x": 10,
+      "x": 8,
       "y": 2,
       "solid": true,
       "accentColor": "#E88D4F",
@@ -68,7 +132,7 @@
     {
       "id": "frame-window",
       "kind": "art_frame",
-      "x": 13,
+      "x": 10,
       "y": 2,
       "solid": true,
       "accentColor": "#72B8FF",
@@ -78,7 +142,7 @@
     {
       "id": "frame-malon",
       "kind": "art_frame",
-      "x": 16,
+      "x": 12,
       "y": 2,
       "solid": true,
       "accentColor": "#C084FC",
@@ -88,7 +152,7 @@
     {
       "id": "frame-ran",
       "kind": "art_frame",
-      "x": 19,
+      "x": 14,
       "y": 2,
       "solid": true,
       "accentColor": "#7ED957",
@@ -98,8 +162,8 @@
     {
       "id": "easel-astrovert",
       "kind": "art_frame",
-      "x": 19,
-      "y": 6,
+      "x": 3,
+      "y": 5,
       "solid": true,
       "accentColor": "#60A5FA",
       "label": { "vi": "Astrovert (WIP)", "en": "Astrovert (WIP)" },
@@ -108,8 +172,8 @@
     {
       "id": "easel-ink",
       "kind": "art_frame",
-      "x": 19,
-      "y": 9,
+      "x": 3,
+      "y": 8,
       "solid": true,
       "accentColor": "#F472B6",
       "label": { "vi": "Ink the Game (WIP)", "en": "Ink the Game (WIP)" },
@@ -118,8 +182,8 @@
     {
       "id": "merch-counter",
       "kind": "merch_stall",
-      "x": 4,
-      "y": 9,
+      "x": 5,
+      "y": 12,
       "w": 2,
       "h": 1,
       "solid": true,
@@ -127,20 +191,9 @@
       "action": { "type": "merch" }
     },
     {
-      "id": "dom-desk",
-      "kind": "easel_desk",
-      "x": 16,
-      "y": 7,
-      "w": 2,
-      "h": 1,
-      "solid": true,
-      "label": { "vi": "Bàn vẽ của Dom (About)", "en": "Dom's Studio Desk (About)" },
-      "action": { "type": "about" }
-    },
-    {
       "id": "exhibition-catalog",
       "kind": "tea_table",
-      "x": 11,
+      "x": 10,
       "y": 8,
       "w": 2,
       "h": 1,
@@ -149,31 +202,10 @@
       "action": { "type": "gallery" }
     },
     {
-      "id": "plant-nw",
-      "kind": "potted_plant",
-      "x": 3,
-      "y": 3,
-      "solid": true
-    },
-    {
-      "id": "plant-ne",
-      "kind": "potted_plant",
-      "x": 20,
-      "y": 3,
-      "solid": true
-    },
-    {
-      "id": "plant-sw",
-      "kind": "potted_plant",
-      "x": 3,
-      "y": 11,
-      "solid": true
-    },
-    {
       "id": "bookshelf-w",
       "kind": "bookshelf",
       "x": 3,
-      "y": 6,
+      "y": 11,
       "solid": true,
       "label": { "vi": "Kệ sách phác thảo", "en": "Sketchbook Shelf" },
       "action": {
@@ -193,10 +225,208 @@
       }
     },
     {
+      "id": "plant-nw",
+      "kind": "potted_plant",
+      "x": 3,
+      "y": 3,
+      "solid": true
+    },
+    {
+      "id": "plant-ne",
+      "kind": "potted_plant",
+      "x": 16,
+      "y": 3,
+      "solid": true
+    },
+    {
+      "id": "plant-se-gallery",
+      "kind": "potted_plant",
+      "x": 16,
+      "y": 14,
+      "solid": true
+    },
+    {
+      "id": "behind-scenes-board",
+      "kind": "behind_scenes_board",
+      "x": 20,
+      "y": 2,
+      "w": 2,
+      "h": 1,
+      "solid": true,
+      "label": { "vi": "Bảng Hậu Trường (Behind the Scenes)", "en": "Behind-the-Scenes Board" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Góc Hậu Trường Tranh", "en": "Behind the Scenes" },
+        "portrait": "dom",
+        "lines": [
+          {
+            "vi": "Trên bảng ghim đầy bản nháp 16×16 và bảng màu cho 'Sai Gon Tales' & 'Trung Thu Vui Ký'!",
+            "en": "Pinned with early 16×16 thumbnails and color palettes for 'Sai Gon Tales' & 'Mid-Autumn Chronicles'!"
+          },
+          {
+            "vi": "Hầu hết tranh ngoài phòng khách đều bắt đầu từ một bức ảnh chụp vội lúc đi dạo đêm ở Sài Gòn, rồi tối giản từng chấm pixel một.",
+            "en": "Most gallery pieces started as quick snapshots from late-night Saigon strolls, distilled dot by dot into pixel stories."
+          }
+        ]
+      }
+    },
+    {
+      "id": "hobby-shelf",
+      "kind": "hobby_shelf",
+      "x": 23,
+      "y": 2,
+      "solid": true,
+      "label": { "vi": "Kệ Hobby của Dom", "en": "Dom's Hobby Shelf" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Kệ Sở Thích (Hobby)", "en": "Hobby Shelf" },
+        "portrait": "dom",
+        "lines": [
+          {
+            "vi": "Bộ sưu tập băng game pixel cổ điển, máy ảnh film cũ và vài mô hình nhỏ xíu Dom hay ngắm lúc bí ý tưởng.",
+            "en": "Retro pixel cartridges, a vintage film camera, and tiny figurines Dom collects for visual inspiration."
+          }
+        ]
+      }
+    },
+    {
+      "id": "dom-desk",
+      "kind": "easel_desk",
+      "x": 20,
+      "y": 4,
+      "w": 2,
+      "h": 1,
+      "solid": true,
+      "label": { "vi": "Bàn vẽ của Dom (About)", "en": "Dom's Studio Desk (About)" },
+      "action": { "type": "about" }
+    },
+    {
+      "id": "dom-bed",
+      "kind": "bed",
+      "x": 25,
+      "y": 3,
+      "w": 2,
+      "h": 1,
+      "solid": false,
+      "label": { "vi": "Giường ngủ của Dom", "en": "Dom's Cozy Bed" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Giường Ngủ Studio", "en": "Dom's Bed" },
+        "portrait": "dom",
+        "lines": [
+          {
+            "vi": "Góc sạc pin của Dom từ 03:00 đến 09:00 sáng. Đôi khi Mèo Ink cũng lẻn lên nằm ké cuối giường!",
+            "en": "Dom's recharge spot from 03:00 to 09:00 AM. Ink the Cat sneaks onto the foot of the bed whenever she can!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dom-gaming-corner",
+      "kind": "gaming_setup",
+      "x": 24,
+      "y": 7,
+      "w": 2,
+      "h": 1,
+      "solid": true,
+      "label": { "vi": "Góc Chơi Game (Sau 17h)", "en": "Gaming Corner (After 5 PM)" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Góc Chơi Game", "en": "Gaming Corner" },
+        "portrait": "dom",
+        "lines": [
+          {
+            "vi": "Sau 17:00, Dom hay ngồi đây cày game indie 2D để vừa thư giãn vừa học hỏi cách làm animation và ánh sáng pixel!",
+            "en": "After 5:00 PM, Dom unwinds here with cozy 2D indie games — half relaxing, half studying pixel animation!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "kitchen-counter",
+      "kind": "kitchen_counter",
+      "x": 23,
+      "y": 11,
+      "w": 2,
+      "h": 1,
+      "solid": true,
+      "label": { "vi": "Bếp nhỏ của Dom", "en": "Dom's Kitchenette" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Góc Bếp Nhỏ", "en": "Kitchenette" },
+        "portrait": "dom",
+        "lines": [
+          {
+            "vi": "Ấm nước đang sôi lăn tăn — chuẩn bị pha phin cà phê sữa đá hoặc úp tô mì gói khuya cho những buổi vẽ xuyên màn đêm.",
+            "en": "A warm kettle simmering away — ready for Vietnamese iced milk coffee or midnight noodles during late art sessions."
+          }
+        ]
+      }
+    },
+    {
+      "id": "kitchen-fridge",
+      "kind": "fridge",
+      "x": 26,
+      "y": 11,
+      "solid": true,
+      "label": { "vi": "Tủ lạnh đầy nam châm", "en": "Magnet-Covered Fridge" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Tủ Lạnh", "en": "Fridge" },
+        "portrait": "ink_cat",
+        "lines": [
+          {
+            "vi": "Mở ra thấy đầy trà đá, vài lon nước ngọt và... một hộp pate dự trữ cho Mèo Ink!",
+            "en": "Stocked with iced tea, chilled sodas, and a secret stash of tuna treats for Ink the Cat!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "kitchen-table",
+      "kind": "dining_table",
+      "x": 21,
+      "y": 13,
+      "w": 2,
+      "h": 1,
+      "solid": true,
+      "label": { "vi": "Bàn ăn & Cà phê sáng", "en": "Coffee & Dining Table" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Bàn Ăn Nhỏ", "en": "Dining Table" },
+        "portrait": "dom",
+        "lines": [
+          {
+            "vi": "Một ly cà phê sữa đá đang tan nhẹ trên bàn. Góc nhỏ bình yên để nạp năng lượng mỗi sáng.",
+            "en": "A glass of Saigon iced coffee slowly melting on the table — a quiet spot to recharge every morning."
+          }
+        ]
+      }
+    },
+    {
+      "id": "ink-cat-bed",
+      "kind": "cat_bed",
+      "x": 25,
+      "y": 14,
+      "solid": false,
+      "label": { "vi": "Ổ nằm của Mèo Ink", "en": "Ink the Cat's Cushion" },
+      "action": {
+        "type": "dialog",
+        "speaker": { "vi": "Ổ Nằm Của Ink", "en": "Cat Cushion" },
+        "portrait": "ink_cat",
+        "lines": [
+          {
+            "vi": "Chiếc nệm mềm ấm đầy lông mèo đen. Ink hay ghé qua đây nằm cuộn tròn rồi lại chạy đi tuần khắp nhà!",
+            "en": "A soft cushion dusted with black cat fur. Ink curls up here between her house patrols!"
+          }
+        ]
+      }
+    },
+    {
       "id": "welcome-sign",
       "kind": "welcome_sign",
-      "x": 9,
-      "y": 15,
+      "x": 8,
+      "y": 18,
       "solid": true,
       "label": { "vi": "Biển hiệu Dom Pixel Art", "en": "Dom Pixel Art Sign" },
       "action": {
@@ -205,8 +435,8 @@
         "portrait": "dom",
         "lines": [
           {
-            "vi": "DOM PIXEL ART — Nhà triển lãm của những chấm nhỏ. Bước thẳng vào cửa trước để xem tranh nhé!",
-            "en": "DOM PIXEL ART — Home of tiny dots. Head straight through the front door to explore the exhibition!"
+            "vi": "DOM PIXEL ART — Nhà triển lãm của những chấm nhỏ. Bước qua cửa trước là có Mèo Ink chạy ra đón bạn liền đó!",
+            "en": "DOM PIXEL ART — Home of tiny dots. Step through the front door and Ink the Cat will run right over to greet you!"
           }
         ]
       }
@@ -214,8 +444,8 @@
     {
       "id": "contact-mailbox",
       "kind": "mailbox",
-      "x": 14,
-      "y": 14,
+      "x": 13,
+      "y": 17,
       "solid": true,
       "label": { "vi": "Hộp thư Liên Hệ", "en": "Contact Mailbox" },
       "action": { "type": "contact" }
@@ -223,43 +453,57 @@
     {
       "id": "lamp-porch-left",
       "kind": "lamp_post",
-      "x": 9,
-      "y": 13,
+      "x": 8,
+      "y": 16,
       "solid": true
     },
     {
       "id": "lamp-yard-right",
       "kind": "lamp_post",
-      "x": 14,
-      "y": 16,
+      "x": 13,
+      "y": 19,
+      "solid": true
+    },
+    {
+      "id": "lamp-east-garden",
+      "kind": "lamp_post",
+      "x": 22,
+      "y": 18,
       "solid": true
     },
     {
       "id": "tree-yard-1",
       "kind": "tree",
       "x": 4,
-      "y": 14,
+      "y": 17,
       "solid": true
     },
     {
       "id": "tree-yard-2",
       "kind": "tree",
       "x": 6,
-      "y": 17,
+      "y": 21,
       "solid": true
     },
     {
       "id": "tree-yard-3",
       "kind": "tree",
       "x": 17,
-      "y": 14,
+      "y": 17,
+      "solid": true
+    },
+    {
+      "id": "tree-yard-4",
+      "kind": "tree",
+      "x": 25,
+      "y": 17,
       "solid": true
     },
     {
       "id": "town-gate",
       "kind": "town_gate",
-      "x": 20,
-      "y": 17,
+      "x": 25,
+      "y": 20,
       "solid": true,
       "label": { "vi": "Lối ra Thị Trấn (Sắp mở)", "en": "Town Gate (Coming Soon)" },
       "action": {
@@ -268,11 +512,11 @@
         "portrait": "ink_cat",
         "lines": [
           {
-            "vi": "Meo~ Lối đi sang Khu Phố Sài Gòn đang được Dom vẽ thêm tileset từng viên gạch một!",
+            "vi": "Meo~ Lối đi sang Khu Phố Sài Gòn đang được Dom vẽ thêm từng viên gạch một!",
             "en": "Meow~ The path to Saigon Town is being hand-pixelled brick by brick by Dom!"
           },
           {
-            "vi": "Quay lại vào các mùa cập nhật tới để khám phá màn chơi mới nhé.",
+            "vi": "Quay lại vào các mùa cập nhật tới để khám phá khu phố mới nhé.",
             "en": "Check back in future seasonal updates to unlock the new neighborhood."
           }
         ]
@@ -284,19 +528,34 @@
       "id": "ink_cat",
       "name": { "vi": "Mèo Ink", "en": "Ink the Cat" },
       "spriteKey": "ink_cat",
-      "x": 10,
-      "y": 16,
-      "facing": "right",
+      "aiRole": "cat_companion",
+      "x": 12,
+      "y": 10,
+      "facing": "down",
       "dialogue": [
         {
-          "vi": "Meo! Chào mừng bạn ghé thăm nhà của Dom! Mình là Ink — trợ lý gác cổng triển lãm.",
-          "en": "Meow! Welcome to Dom's studio house! I'm Ink — your exhibition greeter."
+          "vi": "Meo~! Chào mừng bạn ghé thăm nhà của Dom! Mình là Ink — chủ nhà kiêm hướng dẫn viên 4 chân.",
+          "en": "Meow~! Welcome to Dom's house! I'm Ink — four-legged host and tour guide."
         },
         {
-          "vi": "Bạn cứ chạm vào sàn (hoặc dùng WASD/mũi tên) để đi vào trong nhà xem 8 bộ tranh treo tường, bàn Postcard và nói chuyện với Dom nhé!",
-          "en": "Tap anywhere on the floor (or use WASD/Arrows) to walk inside, inspect the 8 framed series, browse postcards, and chat with Dom!"
+          "vi": "Cứ đi dạo từ phòng khách sang phòng làm việc và bếp nhé, mình sẽ lon ton đi theo bạn!",
+          "en": "Feel free to wander from the gallery into the studio and kitchen — I'll tag right along!"
         }
       ],
+      "scheduleDialogues": {
+        "follow": [
+          {
+            "vi": "Meo meo~ Mình đi theo bạn tham quan khắp nhà nè! Phòng khách có 8 bộ tranh, bên phải còn có phòng ngủ, bàn vẽ và bếp của Dom nữa đó.",
+            "en": "Meow meow~ I'm following you on the house tour! Check out the 8 gallery frames, plus Dom's studio, bedroom, and kitchen to the east!"
+          }
+        ],
+        "play_cat": [
+          {
+            "vi": "Purrrr~ Đang chơi đuổi bắt với Dom vui quá! Lát chơi xong mình lại chạy theo bạn nhé meo~",
+            "en": "Purrrr~ Playing with Dom right now! I'll come follow you again right after playtime~"
+          }
+        ]
+      },
       "actionButton": {
         "label": { "vi": "Xem nhanh toàn bộ tranh", "en": "Open Quick Gallery" },
         "actionType": "gallery"
@@ -306,19 +565,50 @@
       "id": "dom",
       "name": { "vi": "Dom (Phú Sỹ)", "en": "Dom (Phú Sỹ)" },
       "spriteKey": "dom",
-      "x": 15,
-      "y": 8,
-      "facing": "left",
+      "aiRole": "dom_schedule",
+      "x": 21,
+      "y": 5,
+      "facing": "up",
       "dialogue": [
         {
-          "vi": "Chào bạn! Mình là Dom. Cảm ơn bạn đã gác bộn bề lại để ghé căn phòng nhỏ này.",
-          "en": "Hey there! I'm Dom. Thanks for pausing your busy day to visit my little pixel room."
+          "vi": "Chào bạn! Mình là Dom. Cảm ơn bạn đã gác bộn bề lại để ghé căn nhà nhỏ này.",
+          "en": "Hey there! I'm Dom. Thanks for pausing your busy day to visit my little pixel house."
         },
         {
-          "vi": "Mỗi bức tranh trên tường đều bắt đầu từ một chấm nhỏ (tiny dot) và một mảnh ký ức thân thuộc. Thích bộ nào cứ chạm vào khung tranh để nghe câu chuyện nhé!",
-          "en": "Every artwork on these walls began as a tiny dot and a cherished memory. Walk up to any frame to read its full story!"
+          "vi": "Mỗi bức tranh ngoài phòng khách đều bắt đầu từ một chấm nhỏ (tiny dot). Nhớ ghé bảng Hậu Trường trong phòng mình xem thêm nhé!",
+          "en": "Every artwork in the gallery started from a tiny dot. Check out the Behind-the-Scenes board right here in my studio!"
         }
       ],
+      "scheduleDialogues": {
+        "sleep": [
+          {
+            "vi": "Khò... khò... Zzz... (03:00 – 09:00 là giờ ngủ sạc pin của Dom. Bạn cứ đi dạo xem tranh tự nhiên nhé!)",
+            "en": "Zzz... (03:00 – 09:00 AM is Dom's recharge sleep window. Feel free to keep exploring the exhibition!)"
+          }
+        ],
+        "work": [
+          {
+            "vi": "Chào bạn! Giờ hành chính (09:00 – 17:00) mình đang chấm từng pixel mới ở bàn vẽ đây.",
+            "en": "Hey there! During studio hours (09:00 – 17:00), I'm right here crafting new pixels at my desk."
+          },
+          {
+            "vi": "Lát nữa mỏi tay mình hay đứng dậy chơi với Mèo Ink một chút — bạn thử đứng xem hoặc ghé bảng Behind the Scenes phía trên nhé!",
+            "en": "Every now and then I take a break to play with Ink the Cat — check out the Behind-the-Scenes board right above my desk too!"
+          }
+        ],
+        "play_cat": [
+          {
+            "vi": "Haha bắt được cục mực rồi nhé Ink! Nghỉ giải lao nựng mèo 5 phút lấy cảm hứng vẽ tiếp thôi~",
+            "en": "Haha gotcha, Ink! Taking a quick cat-petting break for fresh creative inspiration~"
+          }
+        ],
+        "gaming": [
+          {
+            "vi": "Sau 17:00 là hết giờ làm, tới giờ mình cày game indie thư giãn rồi! Chơi game cũng là cách mình học nhịp animation pixel đó.",
+            "en": "Past 5:00 PM means off-the-clock indie gaming time! Playing pixel games is secretly how I study cozy animation too."
+          }
+        ]
+      },
       "actionButton": {
         "label": { "vi": "Đọc thêm về Dom", "en": "Read Full Bio" },
         "actionType": "about"
@@ -328,8 +618,9 @@
       "id": "task_snake",
       "name": { "vi": "Rắn Ăn Tásk", "en": "Task-Eating Snake" },
       "spriteKey": "task_snake",
-      "x": 7,
-      "y": 9,
+      "aiRole": "static",
+      "x": 8,
+      "y": 12,
       "facing": "right",
       "dialogue": [
         {
@@ -351,8 +642,8 @@
   "portals": [
     {
       "id": "portal-town",
-      "x": 20,
-      "y": 17,
+      "x": 25,
+      "y": 20,
       "targetMapId": "saigon-town",
       "locked": true,
       "label": { "vi": "Khu Phố Sài Gòn (Sắp mở)", "en": "Saigon Town (Coming Soon)" }

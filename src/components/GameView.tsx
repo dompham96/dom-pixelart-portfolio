@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Direction, Locale, SeasonConfig } from '../types/content';
+import type { Direction, Locale, MapZone, SeasonConfig, TimeOfDayMode } from '../types/content';
+import type { TimeOfDayState } from '../game/engine/TimeOfDay';
 import { domHouseMap } from '../data';
 import { GameEngine, type InteractionEvent, type NearbyPrompt } from '../game/engine/GameEngine';
 import { MobileControls } from './MobileControls';
@@ -7,18 +8,32 @@ import { MobileControls } from './MobileControls';
 interface GameViewProps {
   locale: Locale;
   season: SeasonConfig;
+  timeMode: TimeOfDayMode;
   paused: boolean;
   showDpad: boolean;
   onInteract: (event: InteractionEvent) => void;
+  onTimeStateChange: (state: TimeOfDayState) => void;
 }
 
-export function GameView({ locale, season, paused, showDpad, onInteract }: GameViewProps) {
+export function GameView({
+  locale,
+  season,
+  timeMode,
+  paused,
+  showDpad,
+  onInteract,
+  onTimeStateChange,
+}: GameViewProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<GameEngine | null>(null);
   const interactRef = useRef(onInteract);
+  const timeStateCbRef = useRef(onTimeStateChange);
   interactRef.current = onInteract;
+  timeStateCbRef.current = onTimeStateChange;
 
   const [nearby, setNearby] = useState<NearbyPrompt | null>(null);
+  const [currentZone, setCurrentZone] = useState<MapZone | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,8 +43,11 @@ export function GameView({ locale, season, paused, showDpad, onInteract }: GameV
       canvas,
       domHouseMap,
       season,
+      timeMode,
       (ev) => interactRef.current(ev),
-      (prompt) => setNearby(prompt)
+      (prompt) => setNearby(prompt),
+      (zone) => setCurrentZone(zone),
+      (state) => timeStateCbRef.current(state)
     );
     engineRef.current = engine;
 
@@ -60,6 +78,10 @@ export function GameView({ locale, season, paused, showDpad, onInteract }: GameV
   }, [season]);
 
   useEffect(() => {
+    engineRef.current?.setTimeMode(timeMode);
+  }, [timeMode]);
+
+  useEffect(() => {
     engineRef.current?.setPaused(paused);
   }, [paused]);
 
@@ -67,27 +89,39 @@ export function GameView({ locale, season, paused, showDpad, onInteract }: GameV
     engineRef.current?.setVirtualDirection(dir);
   };
 
+  const handleToggleRun = () => {
+    setIsRunning((prev) => {
+      const next = !prev;
+      engineRef.current?.setVirtualRun(next);
+      return next;
+    });
+  };
+
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (paused) return;
     engineRef.current?.handlePointerTap(e.clientX, e.clientY);
   };
 
+  const zoneTitle = currentZone ? currentZone.name[locale] : domHouseMap.name[locale];
+
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-[#131211] pt-12">
-      {/* Subtle bottom-left helper pill on desktop */}
+      {/* Subtle top-left zone & controls helper pill on desktop */}
       <div className="pointer-events-none fixed left-3 top-14 z-10 hidden border border-[#3B3630] bg-[#131211]/85 px-2.5 py-1 text-[11px] text-[#A89F91] sm:block">
-        <span className="font-pixel text-[#FFCF3D]">{domHouseMap.name[locale]}</span>
+        <span className="font-pixel text-[#FFCF3D]">{zoneTitle}</span>
         <span className="mx-1.5 text-[#3B3630]">|</span>
         <span>
           {locale === 'vi'
-            ? 'WASD / Mũi tên hoặc Click vào tranh & NPC để di chuyển'
-            : 'WASD / Arrows or Click any frame & NPC to walk'}
+            ? 'WASD / Mũi tên • Giữ Shift để chạy • Click tranh & NPC'
+            : 'WASD / Arrows • Hold Shift to run • Click art & NPC'}
         </span>
       </div>
 
-      {/* Compact mobile tip */}
+      {/* Compact mobile zone & tip */}
       <div className="pointer-events-none fixed left-1/2 top-16 z-10 -translate-x-1/2 whitespace-nowrap border border-[#3B3630] bg-[#131211]/85 px-2.5 py-1 text-[11px] text-[#A89F91] sm:hidden">
-        {locale === 'vi' ? 'Chạm sàn để đi • Chạm tranh/NPC để xem' : 'Tap floor to walk • Tap art/NPC'}
+        <span className="font-pixel text-[#FFCF3D]">{zoneTitle}</span>
+        <span className="mx-1 text-[#3B3630]">•</span>
+        <span>{locale === 'vi' ? 'Chạm sàn để đi' : 'Tap to walk'}</span>
       </div>
 
       <canvas
@@ -100,8 +134,10 @@ export function GameView({ locale, season, paused, showDpad, onInteract }: GameV
         <MobileControls
           locale={locale}
           showDpad={showDpad}
+          isRunning={isRunning}
           nearby={nearby}
           onDirectionChange={handleDirectionChange}
+          onToggleRun={handleToggleRun}
           onInteract={() => engineRef.current?.triggerInteract()}
         />
       )}

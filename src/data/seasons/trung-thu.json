@@ -7,31 +7,33 @@
     "en": "Full-moon night glowing with cellophane lanterns, mooncake tea table, and rising sky lanterns."
   },
   "skyColor": "#171321",
-  "ambientOverlay": "rgba(32, 18, 48, 0.25)",
+  "ambientOverlay": "rgba(32, 18, 48, 0.18)",
   "spotlightColor": "rgba(255, 174, 51, 0.34)",
   "particleType": "lanterns",
-  "particleCount": 20,
+  "particleCount": 22,
   "bgmTempo": 82,
   "extraProps": [
     {
       "id": "seasonal-lantern-1",
       "kind": "lantern",
-      "x": 10,
-      "y": 13,
-      "solid": false
+      "x": 9,
+      "y": 16,
+      "solid": false,
+      "light": { "radius": 36, "flicker": true }
     },
     {
       "id": "seasonal-lantern-2",
       "kind": "lantern",
-      "x": 13,
-      "y": 13,
-      "solid": false
+      "x": 12,
+      "y": 16,
+      "solid": false,
+      "light": { "radius": 36, "flicker": true }
     },
     {
       "id": "seasonal-moon-table",
       "kind": "moon_table",
-      "x": 7,
-      "y": 15,
+      "x": 6,
+      "y": 18,
       "solid": true,
       "label": { "vi": "Mâm cỗ Đậu Xanh vs Thập Cẩm", "en": "Mooncake Tea Table" },
       "action": { "type": "artwork", "collectionId": "trung-thu-vui-ky" }
