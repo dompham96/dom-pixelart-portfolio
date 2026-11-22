@@ -605,6 +605,16 @@ class SoundEngine {
     this.playTone(523.25, 0.18, 'triangle', 0.22);
     window.setTimeout(() => this.playTone(659.25, 0.24, 'triangle', 0.2), 95);
   }
+
+  public playPageFlip(): void {
+    if (!this.enabled) return;
+    if (this.tryPlayCustomSfx('page_flip', 0.45)) return;
+    // Soft two-step paper rustle + gentle spine settle
+    this.playFilteredNoise(0.085, 1950 + Math.random() * 260, 0.14);
+    window.setTimeout(() => {
+      this.playFilteredNoise(0.06, 1250 + Math.random() * 180, 0.09);
+    }, 55);
+  }
 }
 
 export const soundEngine = new SoundEngine();
