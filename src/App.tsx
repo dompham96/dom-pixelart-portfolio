@@ -21,6 +21,7 @@ type OverlayState =
 
 export function App() {
   const [mode, setMode] = useState<AppMode>('title');
+  const [hasStartedGame, setHasStartedGame] = useState(false);
   const [locale, setLocale] = useState<Locale>('vi');
   const [seasonId, setSeasonId] = useState<SeasonId>(DEFAULT_ACTIVE_SEASON);
   const [timeMode, setTimeMode] = useState<TimeOfDayMode>('auto');
@@ -33,6 +34,13 @@ export function App() {
   const [activeDialog, setActiveDialog] = useState<ActiveDialog | null>(null);
 
   const currentSeason = seasons[seasonId];
+
+  const switchMode = useCallback((next: AppMode) => {
+    setActiveDialog(null);
+    setOverlay({ kind: 'none' });
+    if (next === 'game') setHasStartedGame(true);
+    setMode(next);
+  }, []);
 
   const handleToggleLocale = () => setLocale((l) => (l === 'vi' ? 'en' : 'vi'));
 
@@ -61,14 +69,12 @@ export function App() {
     } else {
       soundEngine.playChime();
     }
-    setMode('game');
+    switchMode('game');
   };
 
   const handleOpenGallery = () => {
     soundEngine.playChime();
-    setActiveDialog(null);
-    setOverlay({ kind: 'none' });
-    setMode('gallery');
+    switchMode('gallery');
   };
 
   const handleGameInteract = useCallback((event: InteractionEvent) => {
@@ -83,7 +89,7 @@ export function App() {
             if (btn.actionType === 'about') setOverlay({ kind: 'about' });
             else if (btn.actionType === 'merch') setOverlay({ kind: 'merch' });
             else if (btn.actionType === 'contact') setOverlay({ kind: 'contact' });
-            else if (btn.actionType === 'gallery') setMode('gallery');
+            else if (btn.actionType === 'gallery') switchMode('gallery');
             else if (btn.actionType === 'artwork' && btn.collectionId) {
               const col = getCollectionById(btn.collectionId);
               if (col) setOverlay({ kind: 'artwork', collection: col });
@@ -119,7 +125,7 @@ export function App() {
         setOverlay({ kind: 'contact' });
         break;
       case 'gallery':
-        setMode('gallery');
+        switchMode('gallery');
         break;
       case 'dialog':
         setActiveDialog({
@@ -129,65 +135,61 @@ export function App() {
         });
         break;
     }
-  }, []);
+  }, [switchMode]);
 
-  const isGamePaused = overlay.kind !== 'none' || activeDialog !== null;
+  const isGamePaused = mode !== 'game' || overlay.kind !== 'none' || activeDialog !== null;
 
   return (
     <div className="min-h-dvh w-full bg-[#131211] text-[#F5EFE6]">
-      {mode === 'title' ? (
+      {mode === 'title' && (
         <TitleScreen
           locale={locale}
           season={currentSeason}
-          audioEnabled={audioEnabled}
           onStartGame={handleStartGame}
           onOpenGallery={handleOpenGallery}
+        />
+      )}
+
+      {mode !== 'title' && (
+        <TopHud
+          mode={mode}
+          locale={locale}
+          season={currentSeason}
+          timeState={timeState}
+          audioEnabled={audioEnabled}
+          showDpad={showDpad}
+          onChangeMode={switchMode}
+          onOpenMerch={() => setOverlay({ kind: 'merch' })}
+          onOpenAbout={() => setOverlay({ kind: 'about' })}
+          onOpenContact={() => setOverlay({ kind: 'contact' })}
           onToggleLocale={handleToggleLocale}
           onToggleAudio={handleToggleAudio}
+          onToggleDpad={() => setShowDpad((v) => !v)}
           onChangeSeason={handleChangeSeason}
+          onCycleTimeMode={handleCycleTimeMode}
         />
-      ) : (
-        <>
-          <TopHud
-            mode={mode}
-            locale={locale}
-            season={currentSeason}
-            timeState={timeState}
-            audioEnabled={audioEnabled}
-            showDpad={showDpad}
-            onChangeMode={(next) => {
-              setActiveDialog(null);
-              setOverlay({ kind: 'none' });
-              setMode(next);
-            }}
-            onOpenMerch={() => setOverlay({ kind: 'merch' })}
-            onOpenAbout={() => setOverlay({ kind: 'about' })}
-            onOpenContact={() => setOverlay({ kind: 'contact' })}
-            onToggleLocale={handleToggleLocale}
-            onToggleAudio={handleToggleAudio}
-            onToggleDpad={() => setShowDpad((v) => !v)}
-            onChangeSeason={handleChangeSeason}
-            onCycleTimeMode={handleCycleTimeMode}
-          />
+      )}
 
-          {mode === 'game' ? (
-            <GameView
-              locale={locale}
-              season={currentSeason}
-              timeMode={timeMode}
-              paused={isGamePaused}
-              showDpad={showDpad}
-              onInteract={handleGameInteract}
-              onTimeStateChange={setTimeState}
-            />
-          ) : (
-            <QuickGallery
-              locale={locale}
-              onSelectCollection={(collection) => setOverlay({ kind: 'artwork', collection })}
-              onSwitchToGame={() => setMode('game')}
-            />
-          )}
-        </>
+      {/* Keep GameView mounted once started so switching to Gallery or Title preserves minigame progress */}
+      {hasStartedGame && (
+        <GameView
+          locale={locale}
+          season={currentSeason}
+          timeMode={timeMode}
+          active={mode === 'game'}
+          paused={isGamePaused}
+          showDpad={showDpad}
+          onInteract={handleGameInteract}
+          onTimeStateChange={setTimeState}
+        />
+      )}
+
+      {mode === 'gallery' && (
+        <QuickGallery
+          locale={locale}
+          onSelectCollection={(collection) => setOverlay({ kind: 'artwork', collection })}
+          onSwitchToGame={() => switchMode('game')}
+        />
       )}
 
       {/* RPG Dialog Box */}

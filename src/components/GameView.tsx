@@ -9,6 +9,7 @@ interface GameViewProps {
   locale: Locale;
   season: SeasonConfig;
   timeMode: TimeOfDayMode;
+  active: boolean;
   paused: boolean;
   showDpad: boolean;
   onInteract: (event: InteractionEvent) => void;
@@ -19,6 +20,7 @@ export function GameView({
   locale,
   season,
   timeMode,
+  active,
   paused,
   showDpad,
   onInteract,
@@ -28,8 +30,12 @@ export function GameView({
   const engineRef = useRef<GameEngine | null>(null);
   const interactRef = useRef(onInteract);
   const timeStateCbRef = useRef(onTimeStateChange);
+  const activeRef = useRef(active);
+  const pausedRef = useRef(paused);
   interactRef.current = onInteract;
   timeStateCbRef.current = onTimeStateChange;
+  activeRef.current = active;
+  pausedRef.current = paused;
 
   const [nearby, setNearby] = useState<NearbyPrompt | null>(null);
   const [currentZone, setCurrentZone] = useState<MapZone | null>(null);
@@ -51,8 +57,11 @@ export function GameView({
     );
     engineRef.current = engine;
 
-    const onResize = () => engine.resize();
+    const onResize = () => {
+      if (activeRef.current) engine.resize();
+    };
     const onKeyDown = (e: KeyboardEvent) => {
+      if (!activeRef.current || pausedRef.current) return;
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
         e.preventDefault();
       }
@@ -85,6 +94,10 @@ export function GameView({
     engineRef.current?.setPaused(paused);
   }, [paused]);
 
+  useEffect(() => {
+    engineRef.current?.setActive(active);
+  }, [active]);
+
   const handleDirectionChange = (dir: Direction | null) => {
     engineRef.current?.setVirtualDirection(dir);
   };
@@ -98,14 +111,19 @@ export function GameView({
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (paused) return;
+    if (!active || paused) return;
     engineRef.current?.handlePointerTap(e.clientX, e.clientY);
   };
 
   const zoneTitle = currentZone ? currentZone.name[locale] : domHouseMap.name[locale];
 
   return (
-    <div className="relative h-dvh w-full overflow-hidden bg-[#131211] pt-12">
+    <div
+      className={`relative h-dvh w-full overflow-hidden bg-[#131211] pt-12 ${
+        active ? 'block' : 'hidden'
+      }`}
+      aria-hidden={!active}
+    >
       {/* Subtle top-left zone & controls helper pill on desktop */}
       <div className="pointer-events-none fixed left-3 top-14 z-10 hidden border border-[#3B3630] bg-[#131211]/85 px-2.5 py-1 text-[11px] text-[#A89F91] sm:block">
         <span className="font-pixel text-[#FFCF3D]">{zoneTitle}</span>
@@ -130,7 +148,7 @@ export function GameView({
         className="pixelated block h-full w-full cursor-pointer touch-none"
       />
 
-      {!paused && (
+      {active && !paused && (
         <MobileControls
           locale={locale}
           showDpad={showDpad}

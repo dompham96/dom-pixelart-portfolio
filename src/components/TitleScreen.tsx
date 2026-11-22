@@ -1,33 +1,25 @@
 import { useEffect, useRef } from 'react';
-import { Play, Grid2x2, Volume2, VolumeX, Sparkles } from 'lucide-react';
-import type { Locale, SeasonConfig, SeasonId } from '../types/content';
-import { domHouseMap, seasonList, siteProfile } from '../data';
+import { Play, Grid2x2 } from 'lucide-react';
+import type { Locale, SeasonConfig } from '../types/content';
+import { domHouseMap, siteProfile } from '../data';
 import { drawProp, drawTile } from '../game/sprites/pixelRenderer';
 
 interface TitleScreenProps {
   locale: Locale;
   season: SeasonConfig;
-  audioEnabled: boolean;
   onStartGame: () => void;
   onOpenGallery: () => void;
-  onToggleLocale: () => void;
-  onToggleAudio: () => void;
-  onChangeSeason: (id: SeasonId) => void;
 }
 
 export function TitleScreen({
   locale,
   season,
-  audioEnabled,
   onStartGame,
   onOpenGallery,
-  onToggleLocale,
-  onToggleAudio,
-  onChangeSeason,
 }: TitleScreenProps) {
   const bgCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Live cozy miniature preview of Dom's night house behind the title screen
+  // Full-bleed living pixel-art scene behind the minimalist game title screen
   useEffect(() => {
     const canvas = bgCanvasRef.current;
     if (!canvas) return;
@@ -39,10 +31,10 @@ export function TitleScreen({
     const worldW = domHouseMap.width * ts;
     const worldH = domHouseMap.height * ts;
 
-    const particles = Array.from({ length: 22 }, () => ({
+    const particles = Array.from({ length: 28 }, () => ({
       x: Math.random() * worldW,
       y: Math.random() * worldH,
-      vy: season.particleType === 'lanterns' ? -5 : season.particleType === 'petals' ? 7 : -2,
+      vy: season.particleType === 'lanterns' ? -5 : season.particleType === 'petals' ? 7 : -2.2,
       phase: Math.random() * Math.PI * 2,
     }));
 
@@ -59,9 +51,12 @@ export function TitleScreen({
       ctx.fillStyle = season.skyColor;
       ctx.fillRect(0, 0, width, height);
 
-      const scale = Math.max(2, Math.ceil(Math.max(width / worldW, height / worldH)));
-      const offsetX = Math.floor((width - worldW * scale) / 2);
-      const offsetY = Math.floor((height - worldH * scale) / 2);
+      // Slight overscan allows a gentle pixel-snapped breathing drift like a game title camera
+      const scale = Math.max(2, Math.ceil(Math.max((width + 24) / worldW, (height + 24) / worldH)));
+      const driftX = Math.round(Math.sin(t * 0.22) * 6);
+      const driftY = Math.round(Math.cos(t * 0.17) * 4);
+      const offsetX = Math.floor((width - worldW * scale) / 2) + driftX;
+      const offsetY = Math.floor((height - worldH * scale) / 2) + driftY;
 
       ctx.save();
       ctx.translate(offsetX, offsetY);
@@ -77,15 +72,16 @@ export function TitleScreen({
         drawProp(ctx, prop, ts, t, false);
       }
 
-      // Soft warm glow from map windows & streetlamps
+      // Warm cozy spotlight halos from studio windows & streetlamps
       const glows: Array<[number, number, number]> = [
         ...(domHouseMap.lights || []).map((l) => [l.x * ts, l.y * ts, l.radius] as [number, number, number]),
         ...domHouseMap.props
           .filter((p) => p.kind === 'lamp_post')
-          .map((p) => [p.x * ts + 8, p.y * ts + 6, 34] as [number, number, number]),
+          .map((p) => [p.x * ts + 8, p.y * ts + 6, 36] as [number, number, number]),
       ];
       for (const [gx, gy, gr] of glows) {
-        const grad = ctx.createRadialGradient(gx, gy, 2, gx, gy, gr);
+        const pulse = 0.92 + 0.08 * Math.sin(t * 2.1 + gx * 0.05);
+        const grad = ctx.createRadialGradient(gx, gy, 2, gx, gy, gr * pulse);
         grad.addColorStop(0, season.spotlightColor);
         grad.addColorStop(1, 'rgba(255,207,61,0)');
         ctx.fillStyle = grad;
@@ -93,9 +89,9 @@ export function TitleScreen({
       }
 
       for (const p of particles) {
-        p.phase += 0.03;
+        p.phase += 0.028;
         p.y = (p.y + p.vy * 0.016 + worldH) % worldH;
-        const alpha = 0.4 + 0.45 * Math.sin(p.phase);
+        const alpha = 0.35 + 0.5 * Math.sin(p.phase);
         ctx.fillStyle =
           season.particleType === 'lanterns'
             ? `rgba(255, 148, 66, ${alpha.toFixed(2)})`
@@ -105,17 +101,18 @@ export function TitleScreen({
 
       ctx.restore();
 
-      // Atmospheric dark vignette so the typography reads effortlessly
+      // Cinematic game-screen vignette: keeps pixel art vivid while ensuring crisp title legibility
       const vignette = ctx.createRadialGradient(
         width / 2,
         height / 2,
-        Math.min(width, height) * 0.12,
+        Math.min(width, height) * 0.14,
         width / 2,
         height / 2,
-        Math.max(width, height) * 0.72
+        Math.max(width, height) * 0.78
       );
-      vignette.addColorStop(0, 'rgba(19, 18, 17, 0.52)');
-      vignette.addColorStop(1, 'rgba(13, 12, 11, 0.88)');
+      vignette.addColorStop(0, 'rgba(19, 18, 17, 0.28)');
+      vignette.addColorStop(0.65, 'rgba(15, 14, 13, 0.54)');
+      vignette.addColorStop(1, 'rgba(10, 9, 8, 0.84)');
       ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, width, height);
 
@@ -127,133 +124,55 @@ export function TitleScreen({
   }, [season]);
 
   return (
-    <main className="relative flex min-h-dvh w-full flex-col items-center justify-between overflow-hidden px-4 py-6 sm:px-8 sm:py-8">
+    <main className="relative flex min-h-dvh w-full flex-col items-center justify-center overflow-hidden px-6 py-12">
       <canvas
         ref={bgCanvasRef}
         aria-hidden="true"
         className="pixelated pointer-events-none fixed inset-0 h-full w-full"
       />
 
-      {/* Top utility bar */}
-      <header className="relative z-10 flex w-full max-w-5xl items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="inline-block h-2.5 w-2.5 bg-[#FFCF3D]" />
-          <span className="font-pixel text-xs uppercase tracking-widest text-[#A89F91] sm:text-sm">
-            {siteProfile.location[locale]}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            id="title-lang-toggle"
-            type="button"
-            onClick={onToggleLocale}
-            className="pixel-btn px-2.5 py-1 text-xs sm:text-sm"
-            aria-label="Switch language"
-          >
-            {locale === 'vi' ? 'VI → EN' : 'EN → VI'}
-          </button>
-          <button
-            id="title-audio-toggle"
-            type="button"
-            onClick={onToggleAudio}
-            className="pixel-btn flex items-center gap-1.5 px-2.5 py-1 text-xs sm:text-sm"
-            aria-label="Toggle sound"
-          >
-            {audioEnabled ? <Volume2 className="h-3.5 w-3.5 text-[#FFCF3D]" /> : <VolumeX className="h-3.5 w-3.5" />}
-            <span className="hidden sm:inline">{audioEnabled ? 'SFX ON' : 'SFX OFF'}</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Center Game-Like Exhibition Start Card */}
-      <section className="relative z-10 my-auto flex w-full max-w-xl flex-col items-center text-center">
-        <div className="pixel-panel w-full px-6 py-8 sm:px-10 sm:py-10">
-          {/* Tiny dot emblem */}
-          <div className="animate-float-slow mx-auto mb-5 flex h-12 w-12 items-center justify-center border-2 border-[#3B3630] bg-[#131211]">
-            <div className="h-3.5 w-3.5 bg-[#FFCF3D]" />
+      {/* Minimalist Game Title / Loading Screen Composition */}
+      <section className="relative z-10 flex w-full max-w-3xl flex-col items-center gap-12 text-center sm:gap-16">
+        {/* Game Logo Typography */}
+        <div className="flex flex-col items-center">
+          <div className="mb-4 flex items-center gap-3" aria-hidden="true">
+            <span className="h-[2px] w-10 bg-[#FFCF3D]/55 sm:w-14" />
+            <span className="animate-float-slow inline-block h-2.5 w-2.5 bg-[#FFCF3D] shadow-[0_0_12px_rgba(255,207,61,0.8)]" />
+            <span className="h-[2px] w-10 bg-[#FFCF3D]/55 sm:w-14" />
           </div>
 
-          <p className="font-mono-code mb-2 text-xs uppercase tracking-[0.22em] text-[#FFCF3D]">
-            {locale === 'vi' ? 'Triển lãm Pixel Art Tương tác' : 'Interactive Pixel Art Exhibition'}
-          </p>
-
-          <h1 className="font-pixel text-4xl font-bold tracking-wider text-[#F5EFE6] sm:text-6xl">
+          <h1 className="game-title-logo font-pixel text-5xl font-bold tracking-[0.08em] text-[#F5EFE6] sm:text-7xl md:text-8xl">
             {siteProfile.brandName}
           </h1>
 
-          <p className="font-pixel mt-2 text-base text-[#FFCF3D] sm:text-xl">
-            “{siteProfile.tagline[locale]}”
+          <p className="game-title-sub font-pixel mt-3 text-sm tracking-[0.18em] text-[#FFCF3D] sm:mt-4 sm:text-xl">
+            {siteProfile.tagline[locale]}
           </p>
+        </div>
 
-          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[#A89F91] sm:text-base">
-            {siteProfile.heroGreeting[locale]}
-          </p>
+        {/* Two Game Menu Actions Only: Start & Quick View */}
+        <div className="flex w-full max-w-[260px] flex-col gap-3.5 sm:max-w-none sm:flex-row sm:justify-center sm:gap-5">
+          <button
+            id="btn-start-game"
+            type="button"
+            onClick={onStartGame}
+            className="pixel-btn pixel-btn-primary group flex min-w-[196px] items-center justify-center gap-2.5 px-8 py-3.5 text-lg font-bold tracking-[0.12em]"
+          >
+            <Play className="h-4 w-4 fill-current transition-transform group-hover:translate-x-0.5" />
+            <span>START</span>
+          </button>
 
-          {/* Primary & Secondary Action Buttons */}
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <button
-              id="btn-start-game"
-              type="button"
-              onClick={onStartGame}
-              className="pixel-btn pixel-btn-primary flex items-center justify-center gap-2.5 px-7 py-3.5 text-lg font-bold tracking-wider"
-            >
-              <Play className="h-5 w-5 fill-current" />
-              <span>{locale === 'vi' ? 'START GAME' : 'START GAME'}</span>
-            </button>
-
-            <button
-              id="btn-quick-gallery"
-              type="button"
-              onClick={onOpenGallery}
-              className="pixel-btn flex items-center justify-center gap-2 px-6 py-3.5 text-base font-semibold"
-            >
-              <Grid2x2 className="h-4 w-4 text-[#FFCF3D]" />
-              <span>{locale === 'vi' ? 'XEM TRANH NHANH' : 'QUICK GALLERY'}</span>
-            </button>
-          </div>
-
-          <p className="font-pixel animate-pixel-blink mt-5 text-xs tracking-widest text-[#A89F91]">
-            {locale === 'vi'
-              ? '— BẤM START ĐỂ VÀO NHÀ THĂM QUAN —'
-              : '— PRESS START TO ENTER THE STUDIO —'}
-          </p>
-
-          {/* Season preview selector */}
-          <div className="mt-6 border-t border-[#3B3630] pt-4">
-            <div className="mb-2 flex items-center justify-center gap-1.5 text-xs text-[#A89F91]">
-              <Sparkles className="h-3.5 w-3.5 text-[#FFCF3D]" />
-              <span>{locale === 'vi' ? 'Không khí mùa triển lãm:' : 'Exhibition Season Theme:'}</span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2">
-              {seasonList.map((s) => {
-                const active = s.id === season.id;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => onChangeSeason(s.id)}
-                    className={`font-pixel border px-3 py-1 text-xs transition ${
-                      active
-                        ? 'border-[#FFCF3D] bg-[#FFCF3D]/15 text-[#FFCF3D]'
-                        : 'border-[#3B3630] bg-[#131211]/70 text-[#A89F91] hover:border-[#A89F91] hover:text-[#F5EFE6]'
-                    }`}
-                  >
-                    {s.badge[locale]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <button
+            id="btn-quick-gallery"
+            type="button"
+            onClick={onOpenGallery}
+            className="pixel-btn group flex min-w-[196px] items-center justify-center gap-2.5 bg-[#131211]/85 px-8 py-3.5 text-lg font-semibold tracking-[0.08em] backdrop-blur-[2px]"
+          >
+            <Grid2x2 className="h-4 w-4 text-[#FFCF3D] transition-transform group-hover:scale-110" />
+            <span>{locale === 'vi' ? 'XEM NHANH' : 'QUICK VIEW'}</span>
+          </button>
         </div>
       </section>
-
-      {/* Footer hint */}
-      <footer className="relative z-10 text-center text-xs text-[#A89F91]">
-        {locale === 'vi'
-          ? 'Desktop: WASD / Mũi tên + E • Mobile: Chạm sàn để đi hoặc bật D-Pad ảo'
-          : 'Desktop: WASD / Arrows + E • Mobile: Tap to walk or toggle Virtual D-Pad'}
-      </footer>
     </main>
   );
 }

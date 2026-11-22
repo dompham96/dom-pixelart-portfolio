@@ -63,6 +63,7 @@ export class GameEngine {
   private lastTime = 0;
   private elapsed = 0;
   private paused = false;
+  private active = true;
 
   // Time of day & NPC AI
   private timeMode: TimeOfDayMode;
@@ -183,6 +184,21 @@ export class GameEngine {
     }
   }
 
+  public setActive(active: boolean): void {
+    if (this.active === active) return;
+    this.active = active;
+    if (!active) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = 0;
+      this.keys.clear();
+      this.virtualDir = null;
+    } else {
+      this.resize();
+      this.snapCamera();
+      this.start();
+    }
+  }
+
   public setVirtualDirection(dir: Direction | null): void {
     this.virtualDir = dir;
     if (dir) {
@@ -229,6 +245,7 @@ export class GameEngine {
     const parent = this.canvas.parentElement;
     const width = parent ? parent.clientWidth : window.innerWidth;
     const height = parent ? parent.clientHeight : window.innerHeight;
+    if (width <= 0 || height <= 0) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     this.canvas.width = Math.max(1, Math.floor(width * dpr));
@@ -406,8 +423,13 @@ export class GameEngine {
   }
 
   private start(): void {
+    if (this.rafId !== 0) return;
     this.lastTime = performance.now();
     const loop = (now: number) => {
+      if (!this.active) {
+        this.rafId = 0;
+        return;
+      }
       const dt = Math.min((now - this.lastTime) / 1000, 0.05);
       this.lastTime = now;
       this.update(dt);
@@ -419,6 +441,7 @@ export class GameEngine {
 
   public destroy(): void {
     cancelAnimationFrame(this.rafId);
+    this.rafId = 0;
   }
 
   private getKeyboardVector(): { dx: number; dy: number } {

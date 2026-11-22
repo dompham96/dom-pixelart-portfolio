@@ -122,6 +122,21 @@ body,
   animation: float-slow 3.2s ease-in-out infinite;
 }
 
+/* Crisp layered pixel extrusion for game title/loading screen typography */
+.game-title-logo {
+  text-shadow:
+    0 3px 0 #26221d,
+    0 6px 0 #0a0908,
+    0 12px 28px rgba(0, 0, 0, 0.85),
+    0 0 36px rgba(255, 207, 61, 0.22);
+}
+
+.game-title-sub {
+  text-shadow:
+    0 2px 0 #0a0908,
+    0 4px 16px rgba(0, 0, 0, 0.9);
+}
+
 /* Custom dark scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
