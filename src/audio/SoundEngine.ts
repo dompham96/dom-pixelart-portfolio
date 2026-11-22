@@ -8,13 +8,14 @@ export interface AudioManifest {
 
 /**
  * Hybrid Web Audio Engine:
- * - File-first: automatically uses real .mp3/.ogg files dropped into public/assets/audio/ (via manifest.json)
+ * - File-first: uses real .mp3/.ogg files dropped into public/assets/audio/ (via manifest.json)
  *   with smooth crossfades and indoor low-pass muffling.
- * - Procedural fallback: warm multi-voice synth BGM, surface-aware footsteps (grass/stone/wood/carpet),
- *   cute cat meow, and gentle ambient layer when no audio files are provided yet.
+ * - Procedural fallback: clear, warm, compressor-balanced lo-fi/chiptune BGM, surface-aware footsteps
+ *   (grass/stone/wood/carpet), cute cat meow, and gentle day/night ambient layer.
  */
 class SoundEngine {
   private ctx: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
   private enabled = false;
   private manifestLoaded = false;
   private manifest: AudioManifest = {};
@@ -90,11 +91,25 @@ class SoundEngine {
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return null;
       this.ctx = new AudioCtx();
-    }
-    if (this.ctx.state === 'suspended') {
-      void this.ctx.resume();
+
+      const compressor = this.ctx.createDynamicsCompressor();
+      compressor.threshold.value = -16;
+      compressor.knee.value = 18;
+      compressor.ratio.value = 4;
+      compressor.attack.value = 0.01;
+      compressor.release.value = 0.15;
+
+      const master = this.ctx.createGain();
+      master.gain.value = 0.72;
+      master.connect(compressor);
+      compressor.connect(this.ctx.destination);
+      this.masterGain = master;
     }
     return this.ctx;
+  }
+
+  private getOutputNode(ctx: AudioContext): AudioNode {
+    return this.masterGain || ctx.destination;
   }
 
   public isEnabled(): boolean {
@@ -126,25 +141,43 @@ class SoundEngine {
     }
   }
 
+  private activateAudioPipeline(): void {
+    const ctx = this.ensureContext();
+    if (!ctx) return;
+
+    const startNow = () => {
+      if (!this.enabled) return;
+      this.playChime();
+      this.syncTracks();
+      this.applyIndoorFilter();
+    };
+
+    if (ctx.state === 'suspended') {
+      void ctx.resume().then(startNow).catch(() => {
+        startNow();
+      });
+    } else {
+      startNow();
+    }
+  }
+
   public toggle(): boolean {
     this.enabled = !this.enabled;
     this.initManifest();
 
     if (this.enabled) {
-      this.ensureContext();
-      this.playChime();
-      this.syncTracks();
-      this.applyIndoorFilter();
+      this.activateAudioPipeline();
     } else {
       this.stopAllLoops();
     }
     return this.enabled;
   }
 
-  public enable(): void {
+  public enable(): boolean {
     if (!this.enabled) {
-      this.toggle();
+      return this.toggle();
     }
+    return true;
   }
 
   private resolveBgmPath(): { key: string; url: string } | null {
@@ -176,7 +209,6 @@ class SoundEngine {
     const ctx = this.ensureContext();
     if (!ctx) return;
 
-    // 1. BGM: file-first with crossfade, fallback to procedural synth
     const bgmMatch = this.resolveBgmPath();
     if (bgmMatch) {
       this.stopProceduralBgm();
@@ -188,7 +220,6 @@ class SoundEngine {
       this.startProceduralBgm();
     }
 
-    // 2. Ambient: file-first with indoor low-pass filter, fallback to subtle procedural ambient
     const ambMatch = this.resolveAmbientPath();
     if (ambMatch) {
       this.stopProceduralAmbient();
@@ -211,10 +242,10 @@ class SoundEngine {
     const gain = ctx.createGain();
     const now = ctx.currentTime;
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.28, now + 1.2);
+    gain.gain.linearRampToValueAtTime(0.36, now + 1.2);
 
     source.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(this.getOutputNode(ctx));
 
     this.bgmAudio = audio;
     this.bgmGain = gain;
@@ -248,11 +279,11 @@ class SoundEngine {
     filter.frequency.setValueAtTime(this.indoors ? 650 : 12000, ctx.currentTime);
 
     const gain = ctx.createGain();
-    gain.gain.setValueAtTime(this.indoors ? 0.07 : 0.2, ctx.currentTime);
+    gain.gain.setValueAtTime(this.indoors ? 0.1 : 0.28, ctx.currentTime);
 
     source.connect(filter);
     filter.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(this.getOutputNode(ctx));
 
     this.ambientAudio = audio;
     this.ambientFilter = filter;
@@ -285,29 +316,34 @@ class SoundEngine {
         now + 0.45
       );
       this.ambientGain.gain.linearRampToValueAtTime(
-        this.indoors ? 0.065 : 0.2,
+        this.indoors ? 0.09 : 0.26,
         now + 0.45
       );
     }
     if (this.bgmGain) {
-      this.bgmGain.gain.linearRampToValueAtTime(this.indoors ? 0.3 : 0.24, now + 0.45);
+      this.bgmGain.gain.linearRampToValueAtTime(this.indoors ? 0.38 : 0.3, now + 0.45);
+    }
+  }
+
+  private playNextBgmBeat(): void {
+    if (!this.enabled) return;
+    const melody = this.period === 'day' ? this.dayMelody : this.nightMelody;
+    const freq = melody[this.noteIndex % melody.length];
+    this.noteIndex++;
+    const vol = this.indoors ? 0.13 : 0.1;
+    // Warm music-box / lo-fi electric piano timbre
+    this.playTone(freq, 0.34, 'triangle', vol);
+    if (this.noteIndex % 4 === 1) {
+      this.playTone(freq / 2, 0.62, 'sine', vol * 0.85);
     }
   }
 
   private startProceduralBgm(): void {
     if (this.bgmTimer !== null) return;
     const stepMs = Math.round((60 / this.tempo) * 500);
-    this.bgmTimer = window.setInterval(() => {
-      if (!this.enabled) return;
-      const melody = this.period === 'day' ? this.dayMelody : this.nightMelody;
-      const freq = melody[this.noteIndex % melody.length];
-      this.noteIndex++;
-      const vol = this.indoors ? 0.032 : 0.025;
-      this.playTone(freq, 0.28, 'triangle', vol);
-      if (this.noteIndex % 4 === 1) {
-        this.playTone(freq / 2, 0.48, 'sine', vol * 0.78);
-      }
-    }, stepMs);
+    // Play first note right after welcome chime so user immediately hears BGM
+    window.setTimeout(() => this.playNextBgmBeat(), 260);
+    this.bgmTimer = window.setInterval(() => this.playNextBgmBeat(), stepMs);
   }
 
   private stopProceduralBgm(): void {
@@ -321,24 +357,24 @@ class SoundEngine {
     if (this.ambientTimer !== null) return;
     this.ambientTimer = window.setInterval(() => {
       if (!this.enabled) return;
-      // Quietly attenuate outdoor cricket/bird ambience when indoors
-      const gainScale = this.indoors ? 0.28 : 1.0;
+      const gainScale = this.indoors ? 0.3 : 1.0;
       if (this.period === 'night') {
-        // Gentle night cricket twin-chirp
-        if (Math.random() < 0.55) {
-          const f = 3600 + Math.random() * 260;
-          this.playTone(f, 0.035, 'sine', 0.005 * gainScale);
-          window.setTimeout(() => this.playTone(f + 40, 0.035, 'sine', 0.004 * gainScale), 70);
+        if (Math.random() < 0.6) {
+          const f = 3200 + Math.random() * 240;
+          this.playTone(f, 0.045, 'sine', 0.022 * gainScale);
+          window.setTimeout(() => this.playTone(f + 45, 0.045, 'sine', 0.018 * gainScale), 75);
         }
       } else {
-        // Soft distant daytime bird chirp
-        if (Math.random() < 0.4) {
-          const base = 1750 + Math.random() * 450;
-          this.playTone(base, 0.07, 'sine', 0.006 * gainScale);
-          window.setTimeout(() => this.playTone(base * 1.18, 0.09, 'sine', 0.005 * gainScale), 90);
+        if (Math.random() < 0.45) {
+          const base = 1550 + Math.random() * 380;
+          this.playTone(base, 0.09, 'sine', 0.03 * gainScale, base * 1.15);
+          window.setTimeout(
+            () => this.playTone(base * 1.18, 0.1, 'sine', 0.025 * gainScale, base * 1.02),
+            100
+          );
         }
       }
-    }, 2600);
+    }, 2400);
   }
 
   private stopProceduralAmbient(): void {
@@ -355,7 +391,7 @@ class SoundEngine {
     this.stopFileAmbient();
   }
 
-  private tryPlayCustomSfx(key: string, volume = 0.4): boolean {
+  private tryPlayCustomSfx(key: string, volume = 0.55): boolean {
     const relPath = this.manifest.sfx?.[key];
     if (!relPath) return false;
     const ctx = this.ensureContext();
@@ -368,7 +404,7 @@ class SoundEngine {
       src.buffer = cached;
       gain.gain.value = volume;
       src.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(this.getOutputNode(ctx));
       src.start();
       return true;
     }
@@ -398,6 +434,9 @@ class SoundEngine {
     if (!this.enabled) return;
     const ctx = this.ensureContext();
     if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      void ctx.resume();
+    }
 
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
@@ -408,20 +447,27 @@ class SoundEngine {
       osc.frequency.exponentialRampToValueAtTime(Math.max(40, endFreq), now + duration);
     }
 
+    const attack = Math.min(0.02, duration * 0.25);
+    const sustainEnd = Math.max(attack, duration * 0.55);
+
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, gainValue), now + 0.018);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    gain.gain.linearRampToValueAtTime(gainValue, now + attack);
+    gain.gain.setValueAtTime(gainValue * 0.85, now + sustainEnd);
+    gain.gain.linearRampToValueAtTime(0.0001, now + duration);
 
     osc.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(this.getOutputNode(ctx));
     osc.start(now);
-    osc.stop(now + duration + 0.02);
+    osc.stop(now + duration + 0.03);
   }
 
   private playFilteredNoise(duration: number, filterFreq: number, gainValue: number): void {
     if (!this.enabled) return;
     const ctx = this.ensureContext();
     if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      void ctx.resume();
+    }
 
     const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * duration));
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -436,64 +482,63 @@ class SoundEngine {
     const filter = ctx.createBiquadFilter();
     filter.type = 'bandpass';
     filter.frequency.value = filterFreq;
-    filter.Q.value = 1.4;
+    filter.Q.value = 1.2;
 
     const gain = ctx.createGain();
     const now = ctx.currentTime;
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(gainValue, now + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    gain.gain.linearRampToValueAtTime(gainValue, now + 0.01);
+    gain.gain.linearRampToValueAtTime(0.0001, now + duration);
 
     src.connect(filter);
     filter.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(this.getOutputNode(ctx));
     src.start(now);
   }
 
   public playStep(surface: SurfaceType = 'wood', isRunning = false): void {
     if (!this.enabled) return;
     const customKey = `step_${surface}`;
-    if (this.tryPlayCustomSfx(customKey, isRunning ? 0.35 : 0.25)) return;
+    if (this.tryPlayCustomSfx(customKey, isRunning ? 0.5 : 0.36)) return;
 
-    const boost = isRunning ? 1.25 : 1.0;
+    const boost = isRunning ? 1.28 : 1.0;
     switch (surface) {
       case 'grass':
-        this.playFilteredNoise(0.055, 1100 + Math.random() * 300, 0.028 * boost);
+        this.playFilteredNoise(0.065, 1150 + Math.random() * 300, 0.13 * boost);
         break;
       case 'stone':
-        this.playTone(230 + Math.random() * 45, 0.038, 'triangle', 0.024 * boost, 140);
+        this.playTone(250 + Math.random() * 45, 0.048, 'triangle', 0.11 * boost, 145);
         break;
       case 'carpet':
-        this.playTone(95 + Math.random() * 18, 0.04, 'sine', 0.018 * boost, 70);
+        this.playTone(105 + Math.random() * 18, 0.052, 'sine', 0.095 * boost, 72);
         break;
       case 'wood':
       default:
-        this.playTone(145 + Math.random() * 25, 0.048, 'triangle', 0.022 * boost, 105);
+        this.playTone(165 + Math.random() * 28, 0.058, 'triangle', 0.11 * boost, 112);
         break;
     }
   }
 
   public playMeow(): void {
     if (!this.enabled) return;
-    if (this.tryPlayCustomSfx('meow', 0.45)) return;
-    // Cute upward-then-downward pixel cat meow
-    this.playTone(580, 0.09, 'triangle', 0.042, 790);
+    if (this.tryPlayCustomSfx('meow', 0.6)) return;
+    this.playTone(620, 0.1, 'triangle', 0.18, 860);
     window.setTimeout(() => {
-      this.playTone(780, 0.16, 'triangle', 0.038, 520);
-    }, 85);
+      this.playTone(850, 0.18, 'triangle', 0.16, 540);
+    }, 90);
   }
 
   public playBlip(): void {
     if (!this.enabled) return;
-    if (this.tryPlayCustomSfx('blip', 0.28)) return;
-    this.playTone(540 + Math.random() * 60, 0.04, 'square', 0.016);
+    if (this.tryPlayCustomSfx('blip', 0.35)) return;
+    this.playTone(540 + Math.random() * 60, 0.045, 'square', 0.065);
   }
 
   public playChime(): void {
     if (!this.enabled) return;
-    if (this.tryPlayCustomSfx('chime', 0.35)) return;
-    this.playTone(523.25, 0.14, 'triangle', 0.042);
-    window.setTimeout(() => this.playTone(659.25, 0.18, 'triangle', 0.038), 85);
+    if (this.tryPlayCustomSfx('chime', 0.45)) return;
+    this.playTone(523.25, 0.16, 'triangle', 0.17);
+    window.setTimeout(() => this.playTone(659.25, 0.22, 'triangle', 0.15), 90);
   }
 }
 

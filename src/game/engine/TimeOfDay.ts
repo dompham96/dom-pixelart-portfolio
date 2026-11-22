@@ -11,9 +11,14 @@ export interface TimeOfDayState {
   period: TimePeriod;
   domActivity: DomScheduleActivity;
   skyColor: string;
-  /** RGB + alpha for outdoor lightmap darkness */
+  /**
+   * Multiply tint color + strength for outdoor areas:
+   * - Daytime: a = 0 (zero haze, 100% crisp pixel art!)
+   * - Sunset: warm golden-peach multiply tint
+   * - Night: clear cobalt-slate multiply tint (readable, never muddy or pitch-black)
+   */
   outdoorTint: { r: number; g: number; b: number; a: number };
-  /** Warm cozy indoor lightmap tint (much brighter than outdoor at night) */
+  /** Warm cozy indoor lightmap tint (much brighter & warmer than outdoor at night) */
   indoorTint: { r: number; g: number; b: number; a: number };
   /** 0 = daylight (lamps off), 1 = full night (lamps warm & bright) */
   lightIntensity: number;
@@ -79,15 +84,19 @@ function lerpHex(hex1: string, hex2: string, t: number): string {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
-const DAY_OUTDOOR = { r: 255, g: 244, b: 214, a: 0.04 };
-const SUNSET_OUTDOOR = { r: 214, g: 102, b: 56, a: 0.34 };
-const NIGHT_OUTDOOR = { r: 12, g: 14, b: 28, a: 0.68 };
-const LATE_NIGHT_OUTDOOR = { r: 8, g: 10, b: 24, a: 0.76 };
+// Multiply-friendly palettes:
+// Day = completely clear (a = 0, zero haze!)
+// Sunset = warm golden-apricot multiply tint
+// Night = crisp moonlit indigo (readable pixel details, cozy contrast with warm golden lamps)
+const DAY_OUTDOOR = { r: 255, g: 255, b: 255, a: 0 };
+const SUNSET_OUTDOOR = { r: 245, g: 165, b: 120, a: 0.34 };
+const NIGHT_OUTDOOR = { r: 92, g: 108, b: 158, a: 0.56 };
+const LATE_NIGHT_OUTDOOR = { r: 74, g: 88, b: 140, a: 0.66 };
 
-const DAY_INDOOR = { r: 255, g: 240, b: 210, a: 0.02 };
-const SUNSET_INDOOR = { r: 140, g: 82, b: 52, a: 0.12 };
-const NIGHT_INDOOR = { r: 24, g: 18, b: 14, a: 0.24 };
-const LATE_NIGHT_INDOOR = { r: 16, g: 14, b: 22, a: 0.38 };
+const DAY_INDOOR = { r: 255, g: 255, b: 255, a: 0 };
+const SUNSET_INDOOR = { r: 250, g: 215, b: 185, a: 0.14 };
+const NIGHT_INDOOR = { r: 205, g: 184, b: 158, a: 0.24 };
+const LATE_NIGHT_INDOOR = { r: 150, g: 144, b: 175, a: 0.38 };
 
 export function evaluateTimeOfDay(mode: TimeOfDayMode, now: Date = new Date()): TimeOfDayState {
   const hour =
@@ -107,61 +116,59 @@ export function evaluateTimeOfDay(mode: TimeOfDayMode, now: Date = new Date()): 
   let sunlightAlpha: number;
 
   if (hour >= 6 && hour < 7.5) {
-    // Dawn transition: night -> day
     const t = (hour - 6) / 1.5;
     period = t < 0.5 ? 'sunset' : 'day';
-    skyColor = lerpHex('#1c1b29', '#3d586e', t);
+    skyColor = lerpHex('#2b2838', '#5c839e', t);
     outdoorTint = lerpRgba(SUNSET_OUTDOOR, DAY_OUTDOOR, t);
     indoorTint = lerpRgba(SUNSET_INDOOR, DAY_INDOOR, t);
-    lightIntensity = lerp(0.55, 0.05, t);
-    fireflyAlpha = lerp(0.4, 0, t);
-    sunlightAlpha = lerp(0.15, 0.65, t);
+    lightIntensity = lerp(0.45, 0, t);
+    fireflyAlpha = lerp(0.35, 0, t);
+    sunlightAlpha = lerp(0.1, 0.55, t);
   } else if (hour >= 7.5 && hour < 16.5) {
-    // Bright cozy daytime
+    // Crisp clear daytime — zero hazy overlay, zero artificial night lamps
     period = 'day';
-    skyColor = '#3a5468';
+    skyColor = '#5b829c';
     outdoorTint = DAY_OUTDOOR;
     indoorTint = DAY_INDOOR;
-    lightIntensity = 0.06;
+    lightIntensity = 0;
     fireflyAlpha = 0;
-    sunlightAlpha = 0.7;
+    sunlightAlpha = 0.6;
   } else if (hour >= 16.5 && hour < 18.75) {
-    // Golden hour sunset -> dusk
     const t = (hour - 16.5) / 2.25;
     period = 'sunset';
     if (t < 0.55) {
       const k = t / 0.55;
-      skyColor = lerpHex('#3a5468', '#4a2e2b', k);
+      skyColor = lerpHex('#5b829c', '#5e3c38', k);
       outdoorTint = lerpRgba(DAY_OUTDOOR, SUNSET_OUTDOOR, k);
       indoorTint = lerpRgba(DAY_INDOOR, SUNSET_INDOOR, k);
-      lightIntensity = lerp(0.1, 0.55, k);
-      fireflyAlpha = lerp(0, 0.35, k);
-      sunlightAlpha = lerp(0.65, 0.25, k);
+      lightIntensity = lerp(0, 0.48, k);
+      fireflyAlpha = lerp(0, 0.3, k);
+      sunlightAlpha = lerp(0.55, 0.15, k);
     } else {
       const k = (t - 0.55) / 0.45;
-      skyColor = lerpHex('#4a2e2b', '#131211', k);
+      skyColor = lerpHex('#5e3c38', '#1a1b24', k);
       outdoorTint = lerpRgba(SUNSET_OUTDOOR, NIGHT_OUTDOOR, k);
       indoorTint = lerpRgba(SUNSET_INDOOR, NIGHT_INDOOR, k);
-      lightIntensity = lerp(0.55, 0.95, k);
-      fireflyAlpha = lerp(0.35, 0.9, k);
-      sunlightAlpha = lerp(0.25, 0, k);
+      lightIntensity = lerp(0.48, 0.9, k);
+      fireflyAlpha = lerp(0.3, 0.9, k);
+      sunlightAlpha = lerp(0.15, 0, k);
     }
   } else if (hour >= 18.75 || hour < 2.5) {
-    // Cozy Night Exhibition
+    // Cozy Night Exhibition — atmospheric yet clear and readable
     period = 'night';
-    skyColor = '#131211';
+    skyColor = '#181a24';
     outdoorTint = NIGHT_OUTDOOR;
     indoorTint = NIGHT_INDOOR;
     lightIntensity = 1.0;
     fireflyAlpha = 1.0;
     sunlightAlpha = 0;
   } else {
-    // Late night / early dawn (02:30 - 06:00) — Dom is sleeping
+    // Late night / early dawn (02:30 - 06:00) — Dom sleeping
     period = 'night';
-    skyColor = '#0d0e16';
+    skyColor = '#121521';
     outdoorTint = LATE_NIGHT_OUTDOOR;
     indoorTint = LATE_NIGHT_INDOOR;
-    lightIntensity = 0.92;
+    lightIntensity = 0.95;
     fireflyAlpha = 0.85;
     sunlightAlpha = 0;
   }

@@ -10,9 +10,11 @@ Tài liệu siêu gọn để **Dom chỉ cần tập trung vẽ trong Photoshop
 02_Minigame_Seasonal/
 ├── maps/
 │   └── dom-house/
-│       ├── ground.png         (Bắt buộc: nền bản đồ tĩnh - đất, sàn, tường, đồ tĩnh)
+│       ├── ground.png         (Bắt buộc: bản đồ ánh sáng BAN NGÀY trong trẻo, màu tươi rõ)
+│       ├── ground_sunset.png  (Tùy chọn: bản đồ tự chỉnh màu Hoàng hôn trong Photoshop)
+│       ├── ground_night.png   (Tùy chọn: bản đồ tự thiết kế ánh sáng Ban đêm trong Photoshop — tắt bóng tối tự động!)
 │       ├── foreground.png     (Tùy chọn: mái nhà, tán cây cao che lên đầu nhân vật)
-│       ├── nightOverlay.png   (Tùy chọn: lớp ánh sáng ban đêm tự vẽ nếu thích)
+│       ├── nightOverlay.png   (Tùy chọn: các vệt ánh đèn vàng hắt vẽ trên nền trong suốt)
 │       ├── guide.png          (Bắt buộc khi đổi bố cục: layer 5 màu đánh dấu)
 │       └── notes.txt          (Ghi chú ngắn tên các chấm tím: tranh, NPC, giường, cây...)
 ├── characters/

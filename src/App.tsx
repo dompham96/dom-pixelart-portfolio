@@ -26,6 +26,7 @@ export function App() {
   const [timeMode, setTimeMode] = useState<TimeOfDayMode>('auto');
   const [timeState, setTimeState] = useState<TimeOfDayState>(() => evaluateTimeOfDay('auto'));
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const [userMutedAudio, setUserMutedAudio] = useState(false);
   const [showDpad, setShowDpad] = useState(false);
 
   const [overlay, setOverlay] = useState<OverlayState>({ kind: 'none' });
@@ -38,6 +39,7 @@ export function App() {
   const handleToggleAudio = () => {
     const enabled = soundEngine.toggle();
     setAudioEnabled(enabled);
+    setUserMutedAudio(!enabled);
   };
 
   const handleChangeSeason = (id: SeasonId) => {
@@ -53,7 +55,12 @@ export function App() {
   };
 
   const handleStartGame = () => {
-    soundEngine.playChime();
+    if (!audioEnabled && !userMutedAudio) {
+      const enabled = soundEngine.enable();
+      setAudioEnabled(enabled);
+    } else {
+      soundEngine.playChime();
+    }
     setMode('game');
   };
 

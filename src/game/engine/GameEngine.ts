@@ -150,6 +150,8 @@ export class GameEngine {
 
   private preloadMapAssets(): void {
     spriteManager.preloadImage(this.map.layers?.ground);
+    spriteManager.preloadImage(this.map.layers?.groundSunset);
+    spriteManager.preloadImage(this.map.layers?.groundNight);
     spriteManager.preloadImage(this.map.layers?.foreground);
     spriteManager.preloadImage(this.map.layers?.nightOverlay);
     spriteManager.preloadImage(this.season.mapOverlay);
@@ -715,10 +717,20 @@ export class GameEngine {
     ctx.scale(this.scale, this.scale);
     ctx.translate(-Math.round(this.camX), -Math.round(this.camY));
 
-    // 1. Base map layer: prefer full-canvas hand-drawn Photoshop PNG, fallback to tile grid
-    const groundImg = spriteManager.getImage(this.map.layers?.ground);
-    if (groundImg) {
-      ctx.drawImage(groundImg, 0, 0, worldW, worldH);
+    // 1. Base map layer: prefer artist-lit Photoshop ground PNGs (day / sunset / night)
+    const groundDay = spriteManager.getImage(this.map.layers?.ground);
+    const groundSunset = spriteManager.getImage(this.map.layers?.groundSunset);
+    const groundNight = spriteManager.getImage(this.map.layers?.groundNight);
+
+    const hasCustomNight = Boolean(groundNight && this.timeState.period === 'night');
+    const hasCustomSunset = Boolean(groundSunset && this.timeState.period === 'sunset');
+
+    if (hasCustomNight && groundNight) {
+      ctx.drawImage(groundNight, 0, 0, worldW, worldH);
+    } else if (hasCustomSunset && groundSunset) {
+      ctx.drawImage(groundSunset, 0, 0, worldW, worldH);
+    } else if (groundDay) {
+      ctx.drawImage(groundDay, 0, 0, worldW, worldH);
     } else {
       for (let y = 0; y < this.map.height; y++) {
         const row = this.map.tiles[y];
@@ -754,9 +766,11 @@ export class GameEngine {
 
     for (const prop of this.getAllProps()) {
       const isNearby = this.currentNearby?.id === `prop:${prop.id}`;
-      // Bed and cat cushion render slightly behind characters standing/sleeping on them
       const yOffset =
-        prop.kind === 'art_frame' || prop.kind === 'behind_scenes_board' || prop.kind === 'bed' || prop.kind === 'cat_bed'
+        prop.kind === 'art_frame' ||
+        prop.kind === 'behind_scenes_board' ||
+        prop.kind === 'bed' ||
+        prop.kind === 'cat_bed'
           ? -3
           : 0;
       drawList.push({
@@ -814,19 +828,14 @@ export class GameEngine {
       ctx.drawImage(seasonOverlay, 0, 0, worldW, worldH);
     }
 
-    // 5. Dynamic Day/Night Offscreen Lightmap + Warm Spotlights
-    this.renderDynamicLighting(ctx, ts, worldW, worldH);
+    // 5. Dynamic Day/Night Photoshop-style Multiply Lightmap (skipped if artist supplied hand-lit map!)
+    const skipSyntheticDarkening = hasCustomNight || hasCustomSunset;
+    this.renderDynamicLighting(ctx, ts, worldW, worldH, skipSyntheticDarkening);
 
     // 6. Seasonal particles (fireflies fade out cleanly in bright daylight)
     this.renderParticles(ctx);
 
     ctx.restore();
-
-    // 7. Subtle seasonal atmosphere tint (softened in bright daytime)
-    if (this.timeState.period !== 'day') {
-      ctx.fillStyle = this.season.ambientOverlay;
-      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    }
   }
 
   private collectLights(ts: number): Array<{
@@ -838,27 +847,28 @@ export class GameEngine {
   }> {
     const nightWeight = this.timeState.lightIntensity;
     const lights: Array<{ x: number; y: number; r: number; color: string; activeWeight: number }> = [];
+    if (nightWeight <= 0.04) return lights;
 
     for (const prop of this.getAllProps()) {
       if (prop.kind === 'art_frame') {
         lights.push({
           x: prop.x * ts + 8,
           y: prop.y * ts + 14,
-          r: 22,
+          r: 26,
           color: this.season.spotlightColor,
-          activeWeight: Math.max(0.35, nightWeight),
+          activeWeight: nightWeight,
         });
       } else if (prop.kind === 'lamp_post' || prop.kind === 'lantern') {
-        const flicker = 1 + Math.sin(this.elapsed * 5.2 + prop.x * 3) * 0.06;
+        const flicker = 1 + Math.sin(this.elapsed * 5.2 + prop.x * 3) * 0.05;
         lights.push({
           x: prop.x * ts + 8,
           y: prop.y * ts + 6,
-          r: (prop.light?.radius || 36) * flicker,
+          r: (prop.light?.radius || 46) * flicker,
           color: prop.light?.color || this.season.spotlightColor,
           activeWeight: nightWeight,
         });
       } else if (prop.light) {
-        const flicker = prop.light.flicker ? 1 + Math.sin(this.elapsed * 5 + prop.x) * 0.06 : 1;
+        const flicker = prop.light.flicker ? 1 + Math.sin(this.elapsed * 5 + prop.x) * 0.05 : 1;
         lights.push({
           x: prop.x * ts + ((prop.w || 1) * ts) / 2,
           y: prop.y * ts + ((prop.h || 1) * ts) / 2,
@@ -870,92 +880,89 @@ export class GameEngine {
     }
 
     for (const ml of this.map.lights || []) {
-      const flicker = ml.flicker ? 1 + Math.sin(this.elapsed * 5 + ml.x) * 0.06 : 1;
-      const weight = ml.onlyAtNight === false ? Math.max(0.45, nightWeight) : nightWeight;
+      const flicker = ml.flicker ? 1 + Math.sin(this.elapsed * 5 + ml.x) * 0.05 : 1;
       lights.push({
         x: ml.x * ts,
         y: ml.y * ts,
-        r: ml.radius * flicker,
+        r: (ml.radius + 8) * flicker,
         color: ml.color || this.season.spotlightColor,
-        activeWeight: weight,
+        activeWeight: nightWeight,
       });
     }
 
     return lights;
   }
 
+  private blendToWhite(c: { r: number; g: number; b: number; a: number }): string {
+    // Interpolate between pure white (neutral in multiply mode) and target tint by alpha strength
+    const r = Math.round(255 + (c.r - 255) * c.a);
+    const g = Math.round(255 + (c.g - 255) * c.a);
+    const b = Math.round(255 + (c.b - 255) * c.a);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
   private renderDynamicLighting(
     ctx: CanvasRenderingContext2D,
     ts: number,
     worldW: number,
-    worldH: number
+    worldH: number,
+    skipSyntheticDarkening: boolean
   ): void {
     const lights = this.collectLights(ts);
-    const { outdoorTint, indoorTint, sunlightAlpha } = this.timeState;
+    const { outdoorTint, indoorTint } = this.timeState;
 
-    // 1. Offscreen lightmap splits outdoor darkness vs warm cozy indoor rooms
-    if (this.lightCtx && outdoorTint.a > 0.03) {
+    // 1. Photoshop-style Multiply Lightmap:
+    // Pure daytime (outdoorTint.a === 0) renders 0 overlays -> 100% crisp, zero haze!
+    if (!skipSyntheticDarkening && this.lightCtx && outdoorTint.a > 0.01) {
       const lctx = this.lightCtx;
       lctx.globalCompositeOperation = 'source-over';
-      lctx.clearRect(0, 0, worldW, worldH);
 
-      // Base outdoor atmospheric shade
-      lctx.fillStyle = `rgba(${outdoorTint.r}, ${outdoorTint.g}, ${outdoorTint.b}, ${outdoorTint.a})`;
+      // Fill outdoor ambient multiply color (white = untouched, indigo = moonlit night)
+      lctx.fillStyle = this.blendToWhite(outdoorTint);
       lctx.fillRect(0, 0, worldW, worldH);
 
-      // Keep indoor rooms warmly lit and clearer than the night courtyard
+      // Indoor rooms stay noticeably warmer & brighter than the night courtyard
+      lctx.fillStyle = this.blendToWhite(indoorTint);
       for (const rect of this.map.indoorRects || []) {
-        lctx.clearRect(rect.x * ts, rect.y * ts, rect.w * ts, rect.h * ts);
-        lctx.fillStyle = `rgba(${indoorTint.r}, ${indoorTint.g}, ${indoorTint.b}, ${indoorTint.a})`;
         lctx.fillRect(rect.x * ts, rect.y * ts, rect.w * ts, rect.h * ts);
       }
 
-      // Carve soft light holes around active lamps, windows & gallery track lights
-      lctx.globalCompositeOperation = 'destination-out';
+      // Paint bright warm-white light pools on the lightmap using 'lighten' so lamps
+      // restore full crisp brightness & warm hue right where they shine!
+      lctx.globalCompositeOperation = 'lighten';
       for (const l of lights) {
         if (l.activeWeight <= 0.05) continue;
         const grad = lctx.createRadialGradient(l.x, l.y, 2, l.x, l.y, l.r);
-        grad.addColorStop(0, `rgba(0, 0, 0, ${(0.88 * l.activeWeight).toFixed(2)})`);
+        grad.addColorStop(0, `rgba(255, 244, 214, ${Math.min(1, l.activeWeight).toFixed(2)})`);
+        grad.addColorStop(0.55, `rgba(255, 224, 165, ${(0.55 * l.activeWeight).toFixed(2)})`);
         grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         lctx.fillStyle = grad;
         lctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
       }
 
-      ctx.drawImage(this.lightCanvas, 0, 0);
-    }
-
-    // 2. Soft golden warm glow halos on top of active lamps & frames
-    for (const l of lights) {
-      if (l.activeWeight <= 0.08) continue;
       ctx.save();
-      ctx.globalAlpha = l.activeWeight;
-      const grad = ctx.createRadialGradient(l.x, l.y, 2, l.x, l.y, l.r);
-      grad.addColorStop(0, l.color);
-      grad.addColorStop(1, 'rgba(255, 207, 61, 0)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.drawImage(this.lightCanvas, 0, 0);
       ctx.restore();
     }
 
-    // 3. Gentle daytime window sunbeams inside the studio house
-    if (sunlightAlpha > 0.05) {
+    // 2. Subtle warm golden glow halos at night (soft 'screen' tint so colors stay vivid, never milky)
+    if (lights.length > 0) {
       ctx.save();
-      ctx.fillStyle = `rgba(255, 238, 178, ${(0.11 * sunlightAlpha).toFixed(3)})`;
-      for (const rect of this.map.indoorRects || []) {
-        ctx.beginPath();
-        const sx = (rect.x + 1) * ts;
-        const sy = (rect.y + rect.h - 2) * ts;
-        ctx.moveTo(sx, sy);
-        ctx.lineTo(sx + 26, sy);
-        ctx.lineTo(sx + 38, sy + 20);
-        ctx.lineTo(sx + 10, sy + 20);
-        ctx.closePath();
-        ctx.fill();
+      ctx.globalCompositeOperation = 'screen';
+      for (const l of lights) {
+        if (l.activeWeight <= 0.12) continue;
+        const alpha = 0.24 * l.activeWeight;
+        const grad = ctx.createRadialGradient(l.x, l.y, 1, l.x, l.y, l.r * 0.72);
+        grad.addColorStop(0, `rgba(255, 207, 92, ${alpha.toFixed(2)})`);
+        grad.addColorStop(1, 'rgba(255, 207, 92, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
       }
       ctx.restore();
     }
 
-    // 4. Optional hand-painted night glow overlay from Photoshop
+    // 3. Optional hand-painted night lamp glow overlay from Photoshop (transparent PNG)
     const nightOverlay = spriteManager.getImage(this.map.layers?.nightOverlay);
     if (nightOverlay && this.timeState.lightIntensity > 0.1) {
       ctx.save();

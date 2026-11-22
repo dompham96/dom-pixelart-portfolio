@@ -91,11 +91,15 @@ export type TileType =
   | 'window_wall';
 
 export interface MapLayers {
-  /** Optional full-canvas hand-drawn ground PNG (e.g. "assets/game/maps/dom-house/ground.png") */
+  /** Base hand-drawn daytime ground PNG (e.g. "assets/game/maps/dom-house/ground.png") */
   ground?: string;
+  /** Optional hand-lit sunset ground PNG — disables synthetic sunset tinting when provided */
+  groundSunset?: string;
+  /** Optional hand-lit night ground PNG — disables synthetic night darkening when provided */
+  groundNight?: string;
   /** Optional overhead layer drawn above characters (roof eaves, canopies, hanging wires) */
   foreground?: string;
-  /** Optional hand-painted night glow layer blended when dark */
+  /** Optional hand-painted night light pools / lamp glows on transparent PNG */
   nightOverlay?: string;
 }
 

@@ -11,19 +11,19 @@ export function drawTile(
 ): void {
   switch (ch) {
     case '.': {
-      ctx.fillStyle = '#0e0d0c';
+      ctx.fillStyle = '#1c241b';
       ctx.fillRect(px, py, ts, ts);
       if ((px / ts + py / ts) % 3 === 0) {
-        ctx.fillStyle = '#181a15';
+        ctx.fillStyle = '#283625';
         ctx.fillRect(px + 3, py + 4, 3, 2);
       }
       break;
     }
     case 'G': {
-      // Courtyard grass
-      ctx.fillStyle = '#243521';
+      // Crisp sunlit courtyard grass
+      ctx.fillStyle = '#4f7a42';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#2f452a';
+      ctx.fillStyle = '#60914e';
       if (((px + py) / ts) % 2 === 0) {
         ctx.fillRect(px + 2, py + 3, 2, 1);
         ctx.fillRect(px + 10, py + 11, 2, 1);
@@ -33,10 +33,10 @@ export function drawTile(
       break;
     }
     case 'P': {
-      // Warm Saigon brick walkway
-      ctx.fillStyle = '#4c4038';
+      // Warm sunlit Saigon brick walkway
+      ctx.fillStyle = '#8b7360';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#5e5047';
+      ctx.fillStyle = '#a38973';
       ctx.fillRect(px + 1, py + 1, 6, 6);
       ctx.fillRect(px + 9, py + 1, 6, 6);
       ctx.fillRect(px + 1, py + 9, 6, 6);
@@ -44,105 +44,105 @@ export function drawTile(
       break;
     }
     case 'O': {
-      // Wooden front porch
-      ctx.fillStyle = '#5c412c';
+      // Warm honey-wood front porch
+      ctx.fillStyle = '#8c6342';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#4a3322';
+      ctx.fillStyle = '#6e4c32';
       ctx.fillRect(px, py + 7, ts, 1);
       ctx.fillRect(px, py + 15, ts, 1);
-      ctx.fillStyle = '#705037';
+      ctx.fillStyle = '#a67852';
       ctx.fillRect(px + 1, py + 1, ts - 2, 1);
       break;
     }
     case 'F': {
-      // Cozy wooden studio floorboards
-      ctx.fillStyle = '#362a22';
+      // Warm sunlit oak studio floorboards
+      ctx.fillStyle = '#6b513e';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#2c221b';
+      ctx.fillStyle = '#574131';
       ctx.fillRect(px, py + 7, ts, 1);
       ctx.fillRect(px, py + 15, ts, 1);
-      ctx.fillStyle = '#42342a';
+      ctx.fillStyle = '#7d604a';
       ctx.fillRect(px + 2, py + 2, 5, 1);
       ctx.fillRect(px + 9, py + 10, 5, 1);
       break;
     }
     case 'K': {
-      // Cozy Saigon retro kitchen checkered tiles
-      ctx.fillStyle = '#3f3831';
+      // Bright cozy Saigon retro kitchen checkered tiles
+      ctx.fillStyle = '#7a6f62';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#51483f';
+      ctx.fillStyle = '#998d7e';
       ctx.fillRect(px, py, 8, 8);
       ctx.fillRect(px + 8, py + 8, 8, 8);
       break;
     }
     case 'C': {
-      // Exhibition dark-red/amber woven gallery runner
-      ctx.fillStyle = '#4a2c24';
+      // Warm terracotta/amber exhibition gallery runner
+      ctx.fillStyle = '#7a4437';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#5e392e';
+      ctx.fillStyle = '#945544';
       ctx.fillRect(px + 1, py + 1, ts - 2, ts - 2);
-      ctx.fillStyle = '#754938';
+      ctx.fillStyle = '#b36b54';
       ctx.fillRect(px + 4, py + 4, 2, 2);
       ctx.fillRect(px + 10, py + 10, 2, 2);
       break;
     }
     case 'T': {
       // Roof / thick upper wall border
-      ctx.fillStyle = '#1b1918';
+      ctx.fillStyle = '#2d2825';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#292522';
+      ctx.fillStyle = '#403934';
       ctx.fillRect(px, py + ts - 4, ts, 4);
-      ctx.fillStyle = '#3b3530';
+      ctx.fillStyle = '#574e47';
       ctx.fillRect(px, py + ts - 4, ts, 1);
       break;
     }
     case 'I': {
-      // Interior dark charcoal museum wall (frames hang here!)
-      ctx.fillStyle = '#262422';
+      // Interior warm charcoal gallery wall (frames pop cleanly!)
+      ctx.fillStyle = '#3f3a36';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#1b1918';
+      ctx.fillStyle = '#2e2a27';
       ctx.fillRect(px, py + ts - 3, ts, 3);
-      ctx.fillStyle = '#383430';
+      ctx.fillStyle = '#544e48';
       ctx.fillRect(px, py, ts, 1);
       break;
     }
     case 'W': {
-      // Exterior front facade wall
-      ctx.fillStyle = '#423830';
+      // Warm cream-ochre Saigon exterior wall
+      ctx.fillStyle = '#806d5c';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#302823';
+      ctx.fillStyle = '#635346';
       ctx.fillRect(px, py + ts - 3, ts, 3);
-      ctx.fillStyle = '#54483f';
+      ctx.fillStyle = '#96816e';
       ctx.fillRect(px, py + 2, ts, 2);
       break;
     }
     case 'N': {
-      // Cozy glowing pixel window on front facade
-      ctx.fillStyle = '#423830';
+      // Cozy pixel window on front facade
+      ctx.fillStyle = '#806d5c';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#1f1a17';
+      ctx.fillStyle = '#2e2620';
       ctx.fillRect(px + 2, py + 2, 12, 10);
-      ctx.fillStyle = '#ffcf3d';
+      ctx.fillStyle = '#ffe073';
       ctx.fillRect(px + 3, py + 3, 10, 8);
-      ctx.fillStyle = '#ffe99e';
+      ctx.fillStyle = '#fff3c4';
       ctx.fillRect(px + 4, py + 4, 4, 3);
-      ctx.fillStyle = '#4f3a29';
+      ctx.fillStyle = '#59422e';
       ctx.fillRect(px + 7, py + 3, 2, 8);
       ctx.fillRect(px + 3, py + 6, 10, 1);
       break;
     }
     case 'D': {
       // Open warm welcoming doorway / room threshold
-      ctx.fillStyle = '#5c412c';
+      ctx.fillStyle = '#8c6342';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = 'rgba(255, 207, 61, 0.2)';
+      ctx.fillStyle = 'rgba(255, 224, 115, 0.25)';
       ctx.fillRect(px, py, ts, ts);
-      ctx.fillStyle = '#7a563b';
+      ctx.fillStyle = '#a87a54';
       ctx.fillRect(px, py, ts, 2);
       break;
     }
     default: {
-      ctx.fillStyle = '#131211';
+      ctx.fillStyle = '#1c241b';
       ctx.fillRect(px, py, ts, ts);
     }
   }
