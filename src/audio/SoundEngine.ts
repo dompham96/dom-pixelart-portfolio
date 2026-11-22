@@ -7,15 +7,28 @@ export interface AudioManifest {
 }
 
 /**
+ * Tiny valid 0.1s silent PCM WAV data URI used to switch iOS Safari out of
+ * ringer-muted ambient mode into Media Playback mode so Web Audio plays reliably
+ * on iPhone/iPad even when the hardware silent switch is enabled.
+ */
+const SILENT_WAV_DATA_URI =
+  'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+/**
  * Hybrid Web Audio Engine:
- * - File-first: uses real .mp3/.ogg files dropped into public/assets/audio/ (via manifest.json)
- *   with smooth crossfades and indoor low-pass muffling.
- * - Procedural fallback: clear, warm, compressor-balanced lo-fi/chiptune BGM, surface-aware footsteps
- *   (grass/stone/wood/carpet), cute cat meow, and gentle day/night ambient layer.
+ * - Cross-browser & iOS-Safari resilient: synchronously unlocks AudioContext inside
+ *   user gestures, sets navigator.audioSession = 'playback' (iOS 17+), plays silent
+ *   HTML <audio> unlock for iOS silent-switch bypass, and handles 'interrupted' state.
+ * - File-first: automatically uses real .mp3/.ogg files from public/assets/audio/manifest.json.
+ * - Procedural fallback: clear, warm lo-fi/chiptune BGM, surface-aware footsteps,
+ *   cute cat meow, and gentle day/night ambient layer.
  */
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
+  private unlockAudioEl: HTMLAudioElement | null = null;
+  private globalUnlockBound = false;
+
   private enabled = false;
   private manifestLoaded = false;
   private manifest: AudioManifest = {};
@@ -40,10 +53,9 @@ class SoundEngine {
   private ambientGain: GainNode | null = null;
   private ambientFilter: BiquadFilterNode | null = null;
 
-  // Cached decoded SFX buffers for instant zero-latency custom sound effects
+  // Cached decoded SFX buffers
   private sfxBuffers = new Map<string, AudioBuffer | 'loading' | 'failed'>();
 
-  // Warm pentatonic progressions: brighter in daytime, mellower at night
   private readonly nightMelody = [
     261.63, 329.63, 392.0, 523.25,
     440.0, 392.0, 329.63, 293.66,
@@ -83,6 +95,24 @@ class SoundEngine {
     return `${base}${relPath}`;
   }
 
+  private bindGlobalReunlock(): void {
+    if (this.globalUnlockBound || typeof window === 'undefined') return;
+    this.globalUnlockBound = true;
+
+    const onUserGesture = () => {
+      if (!this.enabled) return;
+      const ctx = this.ctx;
+      if (ctx && ctx.state !== 'running') {
+        void ctx.resume();
+        this.playSilentUnlockPulse(ctx);
+      }
+    };
+
+    window.addEventListener('pointerdown', onUserGesture, { passive: true });
+    window.addEventListener('touchend', onUserGesture, { passive: true });
+    window.addEventListener('keydown', onUserGesture, { passive: true });
+  }
+
   private ensureContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
     if (!this.ctx) {
@@ -92,17 +122,10 @@ class SoundEngine {
       if (!AudioCtx) return null;
       this.ctx = new AudioCtx();
 
-      const compressor = this.ctx.createDynamicsCompressor();
-      compressor.threshold.value = -16;
-      compressor.knee.value = 18;
-      compressor.ratio.value = 4;
-      compressor.attack.value = 0.01;
-      compressor.release.value = 0.15;
-
+      // Clean, direct masterGain -> destination (universally reliable across all WebViews & Safari)
       const master = this.ctx.createGain();
-      master.gain.value = 0.72;
-      master.connect(compressor);
-      compressor.connect(this.ctx.destination);
+      master.gain.value = 0.85;
+      master.connect(this.ctx.destination);
       this.masterGain = master;
     }
     return this.ctx;
@@ -112,8 +135,50 @@ class SoundEngine {
     return this.masterGain || ctx.destination;
   }
 
+  private playSilentUnlockPulse(ctx: AudioContext): void {
+    try {
+      // 1. iOS 17+ AudioSession API: ensure playback even when hardware ringer switch is muted
+      const nav = navigator as Navigator & { audioSession?: { type: string } };
+      if (nav.audioSession) {
+        nav.audioSession.type = 'playback';
+      }
+    } catch {
+      // Ignore unsupported browsers
+    }
+
+    try {
+      // 2. Synchronous 1-sample Web Audio buffer unlock (required by Safari)
+      const buf = ctx.createBuffer(1, 1, ctx.sampleRate || 22050);
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.start(0);
+    } catch {
+      // Ignore
+    }
+
+    try {
+      // 3. Synchronous HTML <audio> unlock (switches iOS Safari out of muted ambient mode)
+      if (!this.unlockAudioEl) {
+        const el = new Audio(SILENT_WAV_DATA_URI);
+        el.setAttribute('playsinline', 'true');
+        el.volume = 0.01;
+        this.unlockAudioEl = el;
+      }
+      void this.unlockAudioEl.play().catch(() => {
+        // Ignore if autoplay policy rejects outside gesture
+      });
+    } catch {
+      // Ignore
+    }
+  }
+
   public isEnabled(): boolean {
     return this.enabled;
+  }
+
+  public getDebugState(): string {
+    return this.ctx ? this.ctx.state : 'uninitialized';
   }
 
   public setTempo(bpm: number): void {
@@ -142,23 +207,20 @@ class SoundEngine {
   }
 
   private activateAudioPipeline(): void {
+    this.bindGlobalReunlock();
     const ctx = this.ensureContext();
     if (!ctx) return;
 
-    const startNow = () => {
-      if (!this.enabled) return;
-      this.playChime();
-      this.syncTracks();
-      this.applyIndoorFilter();
-    };
-
-    if (ctx.state === 'suspended') {
-      void ctx.resume().then(startNow).catch(() => {
-        startNow();
-      });
-    } else {
-      startNow();
+    // Unlock synchronously inside the user click/tap gesture!
+    this.playSilentUnlockPulse(ctx);
+    if (ctx.state !== 'running') {
+      void ctx.resume();
     }
+
+    // Play immediate confirmation chime & start BGM/ambient right away
+    this.playChime();
+    this.syncTracks();
+    this.applyIndoorFilter();
   }
 
   public toggle(): boolean {
@@ -176,6 +238,11 @@ class SoundEngine {
   public enable(): boolean {
     if (!this.enabled) {
       return this.toggle();
+    }
+    const ctx = this.ctx;
+    if (ctx && ctx.state !== 'running') {
+      this.playSilentUnlockPulse(ctx);
+      void ctx.resume();
     }
     return true;
   }
@@ -242,7 +309,7 @@ class SoundEngine {
     const gain = ctx.createGain();
     const now = ctx.currentTime;
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.36, now + 1.2);
+    gain.gain.linearRampToValueAtTime(0.42, now + 1.2);
 
     source.connect(gain);
     gain.connect(this.getOutputNode(ctx));
@@ -279,7 +346,7 @@ class SoundEngine {
     filter.frequency.setValueAtTime(this.indoors ? 650 : 12000, ctx.currentTime);
 
     const gain = ctx.createGain();
-    gain.gain.setValueAtTime(this.indoors ? 0.1 : 0.28, ctx.currentTime);
+    gain.gain.setValueAtTime(this.indoors ? 0.12 : 0.3, ctx.currentTime);
 
     source.connect(filter);
     filter.connect(gain);
@@ -316,12 +383,12 @@ class SoundEngine {
         now + 0.45
       );
       this.ambientGain.gain.linearRampToValueAtTime(
-        this.indoors ? 0.09 : 0.26,
+        this.indoors ? 0.1 : 0.28,
         now + 0.45
       );
     }
     if (this.bgmGain) {
-      this.bgmGain.gain.linearRampToValueAtTime(this.indoors ? 0.38 : 0.3, now + 0.45);
+      this.bgmGain.gain.linearRampToValueAtTime(this.indoors ? 0.42 : 0.34, now + 0.45);
     }
   }
 
@@ -330,19 +397,17 @@ class SoundEngine {
     const melody = this.period === 'day' ? this.dayMelody : this.nightMelody;
     const freq = melody[this.noteIndex % melody.length];
     this.noteIndex++;
-    const vol = this.indoors ? 0.13 : 0.1;
-    // Warm music-box / lo-fi electric piano timbre
-    this.playTone(freq, 0.34, 'triangle', vol);
+    const vol = this.indoors ? 0.16 : 0.13;
+    this.playTone(freq, 0.36, 'triangle', vol);
     if (this.noteIndex % 4 === 1) {
-      this.playTone(freq / 2, 0.62, 'sine', vol * 0.85);
+      this.playTone(freq / 2, 0.65, 'sine', vol * 0.85);
     }
   }
 
   private startProceduralBgm(): void {
     if (this.bgmTimer !== null) return;
     const stepMs = Math.round((60 / this.tempo) * 500);
-    // Play first note right after welcome chime so user immediately hears BGM
-    window.setTimeout(() => this.playNextBgmBeat(), 260);
+    window.setTimeout(() => this.playNextBgmBeat(), 280);
     this.bgmTimer = window.setInterval(() => this.playNextBgmBeat(), stepMs);
   }
 
@@ -361,15 +426,15 @@ class SoundEngine {
       if (this.period === 'night') {
         if (Math.random() < 0.6) {
           const f = 3200 + Math.random() * 240;
-          this.playTone(f, 0.045, 'sine', 0.022 * gainScale);
-          window.setTimeout(() => this.playTone(f + 45, 0.045, 'sine', 0.018 * gainScale), 75);
+          this.playTone(f, 0.045, 'sine', 0.025 * gainScale);
+          window.setTimeout(() => this.playTone(f + 45, 0.045, 'sine', 0.02 * gainScale), 75);
         }
       } else {
         if (Math.random() < 0.45) {
           const base = 1550 + Math.random() * 380;
-          this.playTone(base, 0.09, 'sine', 0.03 * gainScale, base * 1.15);
+          this.playTone(base, 0.09, 'sine', 0.032 * gainScale, base * 1.15);
           window.setTimeout(
-            () => this.playTone(base * 1.18, 0.1, 'sine', 0.025 * gainScale, base * 1.02),
+            () => this.playTone(base * 1.18, 0.1, 'sine', 0.026 * gainScale, base * 1.02),
             100
           );
         }
@@ -391,7 +456,7 @@ class SoundEngine {
     this.stopFileAmbient();
   }
 
-  private tryPlayCustomSfx(key: string, volume = 0.55): boolean {
+  private tryPlayCustomSfx(key: string, volume = 0.6): boolean {
     const relPath = this.manifest.sfx?.[key];
     if (!relPath) return false;
     const ctx = this.ensureContext();
@@ -434,7 +499,7 @@ class SoundEngine {
     if (!this.enabled) return;
     const ctx = this.ensureContext();
     if (!ctx) return;
-    if (ctx.state === 'suspended') {
+    if (ctx.state !== 'running') {
       void ctx.resume();
     }
 
@@ -465,7 +530,7 @@ class SoundEngine {
     if (!this.enabled) return;
     const ctx = this.ensureContext();
     if (!ctx) return;
-    if (ctx.state === 'suspended') {
+    if (ctx.state !== 'running') {
       void ctx.resume();
     }
 
@@ -499,46 +564,46 @@ class SoundEngine {
   public playStep(surface: SurfaceType = 'wood', isRunning = false): void {
     if (!this.enabled) return;
     const customKey = `step_${surface}`;
-    if (this.tryPlayCustomSfx(customKey, isRunning ? 0.5 : 0.36)) return;
+    if (this.tryPlayCustomSfx(customKey, isRunning ? 0.55 : 0.4)) return;
 
     const boost = isRunning ? 1.28 : 1.0;
     switch (surface) {
       case 'grass':
-        this.playFilteredNoise(0.065, 1150 + Math.random() * 300, 0.13 * boost);
+        this.playFilteredNoise(0.065, 1150 + Math.random() * 300, 0.15 * boost);
         break;
       case 'stone':
-        this.playTone(250 + Math.random() * 45, 0.048, 'triangle', 0.11 * boost, 145);
+        this.playTone(250 + Math.random() * 45, 0.05, 'triangle', 0.13 * boost, 145);
         break;
       case 'carpet':
-        this.playTone(105 + Math.random() * 18, 0.052, 'sine', 0.095 * boost, 72);
+        this.playTone(105 + Math.random() * 18, 0.055, 'sine', 0.11 * boost, 72);
         break;
       case 'wood':
       default:
-        this.playTone(165 + Math.random() * 28, 0.058, 'triangle', 0.11 * boost, 112);
+        this.playTone(165 + Math.random() * 28, 0.06, 'triangle', 0.13 * boost, 112);
         break;
     }
   }
 
   public playMeow(): void {
     if (!this.enabled) return;
-    if (this.tryPlayCustomSfx('meow', 0.6)) return;
-    this.playTone(620, 0.1, 'triangle', 0.18, 860);
+    if (this.tryPlayCustomSfx('meow', 0.65)) return;
+    this.playTone(620, 0.11, 'triangle', 0.22, 880);
     window.setTimeout(() => {
-      this.playTone(850, 0.18, 'triangle', 0.16, 540);
-    }, 90);
+      this.playTone(860, 0.19, 'triangle', 0.2, 540);
+    }, 95);
   }
 
   public playBlip(): void {
     if (!this.enabled) return;
     if (this.tryPlayCustomSfx('blip', 0.35)) return;
-    this.playTone(540 + Math.random() * 60, 0.045, 'square', 0.065);
+    this.playTone(540 + Math.random() * 60, 0.045, 'square', 0.075);
   }
 
   public playChime(): void {
     if (!this.enabled) return;
-    if (this.tryPlayCustomSfx('chime', 0.45)) return;
-    this.playTone(523.25, 0.16, 'triangle', 0.17);
-    window.setTimeout(() => this.playTone(659.25, 0.22, 'triangle', 0.15), 90);
+    if (this.tryPlayCustomSfx('chime', 0.5)) return;
+    this.playTone(523.25, 0.18, 'triangle', 0.22);
+    window.setTimeout(() => this.playTone(659.25, 0.24, 'triangle', 0.2), 95);
   }
 }
 
