@@ -74,13 +74,13 @@ describe('NpcController', () => {
     expect(cat.blocksPlayer).toBe(false);
     expect(cat.catState).toBe('roaming');
 
-    // Visitor steps inside the living room doorway (10, 14)
+    // Visitor steps inside the living room doorway (11, 13)
     for (let i = 0; i < 160; i++) {
       ctrl.update({
         dt: 0.05,
         domActivity: 'gaming',
-        playerX: 10 * ts,
-        playerY: 14 * ts,
+        playerX: 11 * ts,
+        playerY: 13 * ts,
         playerIndoors: true,
         playerIsRunning: false,
         isTileSolidForNpc: isSolid,
@@ -96,8 +96,8 @@ describe('NpcController', () => {
     ctrl.update({
       dt: 0.05,
       domActivity: 'gaming',
-      playerX: 10 * ts,
-      playerY: 18 * ts,
+      playerX: 11 * ts,
+      playerY: 20 * ts,
       playerIndoors: false,
       playerIsRunning: false,
       isTileSolidForNpc: isSolid,

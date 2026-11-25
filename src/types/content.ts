@@ -189,12 +189,15 @@ export interface MapProp {
     | 'kitchen_counter'
     | 'fridge'
     | 'dining_table'
-    | 'cat_bed';
+    | 'cat_bed'
+    | 'bush';
   x: number;
   y: number;
   w?: number;
   h?: number;
   solid?: boolean;
+  /** True when the visual prop is already baked onto ground.png (engine keeps collision + interact badge only) */
+  bakedInMap?: boolean;
   /** Optional sprite ID from public/assets/game/sprites/manifest.json for animated Photoshop props */
   spriteId?: string;
   light?: {

@@ -3,6 +3,7 @@ import { Play, Grid2x2, Shirt, Dices } from 'lucide-react';
 import type { CharacterAppearance, Locale, SeasonConfig } from '../types/content';
 import { domHouseMap, siteProfile } from '../data';
 import { drawProp, drawTile } from '../game/sprites/pixelRenderer';
+import { spriteManager } from '../game/sprites/SpriteManager';
 import { CharacterPreviewCanvas } from './CharacterPreviewCanvas';
 
 interface TitleScreenProps {
@@ -32,6 +33,10 @@ export function TitleScreen({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    spriteManager.init();
+    spriteManager.preloadImage(domHouseMap.layers?.ground);
+    spriteManager.preloadImage(domHouseMap.layers?.foreground);
 
     let rafId = 0;
     const ts = domHouseMap.tileSize;
@@ -69,14 +74,25 @@ export function TitleScreen({
       ctx.translate(offsetX, offsetY);
       ctx.scale(scale, scale);
 
-      for (let y = 0; y < domHouseMap.height; y++) {
-        for (let x = 0; x < domHouseMap.width; x++) {
-          drawTile(ctx, domHouseMap.tiles[y][x], x * ts, y * ts, ts);
+      const groundImg = spriteManager.getImage(domHouseMap.layers?.ground);
+      if (groundImg) {
+        ctx.drawImage(groundImg, 0, 0, worldW, worldH);
+      } else {
+        for (let y = 0; y < domHouseMap.height; y++) {
+          for (let x = 0; x < domHouseMap.width; x++) {
+            drawTile(ctx, domHouseMap.tiles[y][x], x * ts, y * ts, ts);
+          }
         }
       }
 
-      for (const prop of [...domHouseMap.props, ...season.extraProps]) {
+      const sortedProps = [...domHouseMap.props, ...season.extraProps].sort((a, b) => a.y - b.y);
+      for (const prop of sortedProps) {
         drawProp(ctx, prop, ts, t, false);
+      }
+
+      const fgImg = spriteManager.getImage(domHouseMap.layers?.foreground);
+      if (fgImg) {
+        ctx.drawImage(fgImg, 0, 0, worldW, worldH);
       }
 
       // Warm cozy spotlight halos from studio windows & streetlamps

@@ -36,17 +36,17 @@ describe('Pathfinder', () => {
     expect(path.some((p) => blocked.has(`${p.x},${p.y}`))).toBe(false);
   });
 
-  it('routes from courtyard spawn to living room art frames, studio/bedroom, and kitchen', () => {
+  it('routes from garden trailhead spawn through tree avenue to gallery frames, kitchen, studio/bedroom, and town gate', () => {
     const isBlocked = makeHouseBlocker();
     const start = { x: domHouseMap.spawn.x, y: domHouseMap.spawn.y };
 
-    // 1. Living Room Gallery north wall frame ("Qua Ô Cửa Sổ" at 10, 2)
-    const toFrame = findPath(start, { x: 10, y: 2 }, domHouseMap.width, domHouseMap.height, isBlocked, true);
-    expect(toFrame.length).toBeGreaterThan(5);
-    expect(toFrame[toFrame.length - 1]).toEqual({ x: 10, y: 3 });
+    // 1. Living Room Gallery north wall frame ("Qua Ô Cửa Sổ" at 11, 4)
+    const toFrame = findPath(start, { x: 11, y: 4 }, domHouseMap.width, domHouseMap.height, isBlocked, true);
+    expect(toFrame.length).toBeGreaterThan(10);
+    expect(toFrame[toFrame.length - 1]).toEqual({ x: 11, y: 5 });
 
-    // 2. Studio & Bedroom waypoints (Dom's desk, bed, gaming corner)
-    for (const wpId of ['dom_bed', 'dom_desk', 'dom_game', 'cat_play', 'cat_nap']) {
+    // 2. All Studio, Bedroom & Kitchen NPC waypoints (dom_bed, dom_desk, dom_game, cat_play, cat_nap)
+    for (const wpId of ['dom_bed', 'dom_desk', 'dom_game', 'cat_play', 'cat_nap', 'door_entry']) {
       const wp = domHouseMap.waypoints?.find((w) => w.id === wpId);
       expect(wp, `Missing waypoint ${wpId}`).toBeDefined();
       const route = findPath(
@@ -61,8 +61,11 @@ describe('Pathfinder', () => {
       expect(route[route.length - 1]).toEqual({ x: wp!.x, y: wp!.y });
     }
 
-    // 3. Kitchen fridge (26, 11) reachable adjacently
-    const toFridge = findPath(start, { x: 26, y: 11 }, domHouseMap.width, domHouseMap.height, isBlocked, true);
-    expect(toFridge.length).toBeGreaterThan(5);
+    // 3. Kitchen cooking station (22, 7) & East town gate (40, 23) reachable adjacently
+    const toKitchen = findPath(start, { x: 22, y: 7 }, domHouseMap.width, domHouseMap.height, isBlocked, true);
+    expect(toKitchen.length).toBeGreaterThan(10);
+
+    const toGate = findPath(start, { x: 40, y: 23 }, domHouseMap.width, domHouseMap.height, isBlocked, true);
+    expect(toGate.length).toBeGreaterThan(10);
   });
 });

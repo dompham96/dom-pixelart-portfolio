@@ -160,21 +160,23 @@ export function drawProp(
   const w = (prop.w || 1) * ts;
   const h = (prop.h || 1) * ts;
 
-  // Prefer custom animated/static Photoshop sprite sheet if present in manifest
-  const customSpriteId = prop.spriteId || prop.kind;
-  const phaseOffsetMs = ((prop.x * 7 + prop.y * 13) % 11) * 180;
-  const drawnCustom = spriteManager.drawSprite(
-    ctx,
-    customSpriteId,
-    'default',
-    'down',
-    timeSec * 1000 + phaseOffsetMs,
-    x + w / 2,
-    y + h
-  );
+  if (!prop.bakedInMap) {
+    // Prefer custom animated/static Photoshop sprite sheet if present in manifest
+    const customSpriteId = prop.spriteId || prop.kind;
+    const phaseOffsetMs = ((prop.x * 7 + prop.y * 13) % 11) * 180;
+    const drawnCustom = spriteManager.drawSprite(
+      ctx,
+      customSpriteId,
+      'default',
+      'down',
+      timeSec * 1000 + phaseOffsetMs,
+      x + w / 2,
+      y + h
+    );
 
-  if (!drawnCustom) {
-    drawProceduralProp(ctx, prop, x, y, w, timeSec);
+    if (!drawnCustom) {
+      drawProceduralProp(ctx, prop, x, y, w, timeSec);
+    }
   }
 
   // Floating pixel interaction badge when player is nearby

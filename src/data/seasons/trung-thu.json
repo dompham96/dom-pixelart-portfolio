@@ -10,7 +10,7 @@
   "ambientOverlay": "rgba(32, 18, 48, 0.18)",
   "spotlightColor": "rgba(255, 174, 51, 0.34)",
   "particleType": "lanterns",
-  "particleCount": 22,
+  "particleCount": 26,
   "bgmTempo": 82,
   "extraProps": [
     {
@@ -19,7 +19,7 @@
       "x": 9,
       "y": 16,
       "solid": false,
-      "light": { "radius": 36, "flicker": true }
+      "light": { "radius": 42, "flicker": true }
     },
     {
       "id": "seasonal-lantern-2",
@@ -27,13 +27,13 @@
       "x": 12,
       "y": 16,
       "solid": false,
-      "light": { "radius": 36, "flicker": true }
+      "light": { "radius": 42, "flicker": true }
     },
     {
       "id": "seasonal-moon-table",
       "kind": "moon_table",
-      "x": 6,
-      "y": 18,
+      "x": 16,
+      "y": 24,
       "solid": true,
       "label": { "vi": "Mâm cỗ Đậu Xanh vs Thập Cẩm", "en": "Mooncake Tea Table" },
       "action": { "type": "artwork", "collectionId": "trung-thu-vui-ky" }
@@ -42,8 +42,8 @@
   "npcDialogueOverrides": {
     "ink_cat": [
       {
-        "vi": "Meo~ Chúc bạn Trung Thu thật ấm áp! Ngoài sân có mâm cỗ bánh nướng đó, bạn thuộc phe Đậu Xanh hay Thập Cẩm?",
-        "en": "Meow~ Happy Mid-Autumn Festival! Check out the mooncake table in the yard — are you Team Mung Bean or Team Mixed Nuts?"
+        "vi": "Meo~ Chúc bạn Trung Thu thật ấm áp! Ngoài khu vườn có mâm cỗ bánh nướng đó, bạn thuộc phe Đậu Xanh hay Thập Cẩm?",
+        "en": "Meow~ Happy Mid-Autumn Festival! Check out the mooncake table in the garden — are you Team Mung Bean or Team Mixed Nuts?"
       }
     ]
   }

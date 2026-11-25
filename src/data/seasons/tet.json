@@ -10,14 +10,14 @@
   "ambientOverlay": "rgba(56, 20, 12, 0.16)",
   "spotlightColor": "rgba(255, 214, 70, 0.34)",
   "particleType": "petals",
-  "particleCount": 32,
+  "particleCount": 36,
   "bgmTempo": 88,
   "extraProps": [
     {
       "id": "seasonal-mai-left",
       "kind": "mai_tree",
-      "x": 7,
-      "y": 17,
+      "x": 8,
+      "y": 18,
       "solid": true,
       "label": { "vi": "Cây Mai Vàng Đón Tết", "en": "Tet Apricot Blossom Tree" },
       "action": { "type": "artwork", "collectionId": "ran-an-task" }

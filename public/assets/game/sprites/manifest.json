@@ -1,4 +1,501 @@
 {
   "version": 1,
-  "sprites": {}
+  "sprites": {
+    "tree_oak_lg": {
+      "id": "tree_oak_lg",
+      "imageSrc": "assets/game/sprites/tree_oak_lg.png",
+      "frameWidth": 80,
+      "frameHeight": 128,
+      "anchorX": 0.5,
+      "anchorY": 0.96,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_oak_gold_lg": {
+      "id": "tree_oak_gold_lg",
+      "imageSrc": "assets/game/sprites/tree_oak_gold_lg.png",
+      "frameWidth": 80,
+      "frameHeight": 128,
+      "anchorX": 0.5,
+      "anchorY": 0.96,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_oak_md": {
+      "id": "tree_oak_md",
+      "imageSrc": "assets/game/sprites/tree_oak_md.png",
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "anchorX": 0.5,
+      "anchorY": 0.96,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_oak_gold": {
+      "id": "tree_oak_gold",
+      "imageSrc": "assets/game/sprites/tree_oak_gold.png",
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "anchorX": 0.5,
+      "anchorY": 0.96,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_oak_autumn": {
+      "id": "tree_oak_autumn",
+      "imageSrc": "assets/game/sprites/tree_oak_autumn.png",
+      "frameWidth": 48,
+      "frameHeight": 96,
+      "anchorX": 0.5,
+      "anchorY": 0.96,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_oak_sm": {
+      "id": "tree_oak_sm",
+      "imageSrc": "assets/game/sprites/tree_oak_sm.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "anchorX": 0.5,
+      "anchorY": 0.94,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_oak_gold_sm": {
+      "id": "tree_oak_gold_sm",
+      "imageSrc": "assets/game/sprites/tree_oak_gold_sm.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "anchorX": 0.5,
+      "anchorY": 0.94,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_pine_md": {
+      "id": "tree_pine_md",
+      "imageSrc": "assets/game/sprites/tree_pine_md.png",
+      "frameWidth": 48,
+      "frameHeight": 80,
+      "anchorX": 0.5,
+      "anchorY": 0.96,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_pine_teal": {
+      "id": "tree_pine_teal",
+      "imageSrc": "assets/game/sprites/tree_pine_teal.png",
+      "frameWidth": 48,
+      "frameHeight": 80,
+      "anchorX": 0.5,
+      "anchorY": 0.96,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_pine_dark": {
+      "id": "tree_pine_dark",
+      "imageSrc": "assets/game/sprites/tree_pine_dark.png",
+      "frameWidth": 48,
+      "frameHeight": 80,
+      "anchorX": 0.5,
+      "anchorY": 0.96,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_pine_sm": {
+      "id": "tree_pine_sm",
+      "imageSrc": "assets/game/sprites/tree_pine_sm.png",
+      "frameWidth": 32,
+      "frameHeight": 48,
+      "anchorX": 0.5,
+      "anchorY": 0.95,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_spruce_tall": {
+      "id": "tree_spruce_tall",
+      "imageSrc": "assets/game/sprites/tree_spruce_tall.png",
+      "frameWidth": 64,
+      "frameHeight": 144,
+      "anchorX": 0.45,
+      "anchorY": 0.97,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "tree_spruce_gold": {
+      "id": "tree_spruce_gold",
+      "imageSrc": "assets/game/sprites/tree_spruce_gold.png",
+      "frameWidth": 64,
+      "frameHeight": 144,
+      "anchorX": 0.45,
+      "anchorY": 0.97,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "stump_oak": {
+      "id": "stump_oak",
+      "imageSrc": "assets/game/sprites/stump_oak.png",
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 0.92,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 1,
+          "frameDurationsMs": [
+            1000
+          ],
+          "loop": true
+        }
+      }
+    },
+    "bush_green_lg": {
+      "id": "bush_green_lg",
+      "imageSrc": "assets/game/sprites/bush_green_lg.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "anchorX": 0.5,
+      "anchorY": 0.88,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "bush_olive_lg": {
+      "id": "bush_olive_lg",
+      "imageSrc": "assets/game/sprites/bush_olive_lg.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "anchorX": 0.5,
+      "anchorY": 0.88,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "bush_gold_lg": {
+      "id": "bush_gold_lg",
+      "imageSrc": "assets/game/sprites/bush_gold_lg.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "anchorX": 0.5,
+      "anchorY": 0.88,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "bush_green_md": {
+      "id": "bush_green_md",
+      "imageSrc": "assets/game/sprites/bush_green_md.png",
+      "frameWidth": 48,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 0.88,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "bush_olive_md": {
+      "id": "bush_olive_md",
+      "imageSrc": "assets/game/sprites/bush_olive_md.png",
+      "frameWidth": 48,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 0.88,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "bush_gold_md": {
+      "id": "bush_gold_md",
+      "imageSrc": "assets/game/sprites/bush_gold_md.png",
+      "frameWidth": 48,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 0.88,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "bush_autumn_md": {
+      "id": "bush_autumn_md",
+      "imageSrc": "assets/game/sprites/bush_autumn_md.png",
+      "frameWidth": 48,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 0.88,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "bush_sm": {
+      "id": "bush_sm",
+      "imageSrc": "assets/game/sprites/bush_sm.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 0.85,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 2,
+          "frameDurationsMs": [
+            1100,
+            950
+          ],
+          "loop": true
+        }
+      }
+    },
+    "plant_orchid": {
+      "id": "plant_orchid",
+      "imageSrc": "assets/game/sprites/plant_orchid.png",
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 0.95,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 1,
+          "frameDurationsMs": [
+            1000
+          ],
+          "loop": true
+        }
+      }
+    },
+    "plant_fern": {
+      "id": "plant_fern",
+      "imageSrc": "assets/game/sprites/plant_fern.png",
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 0.95,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 1,
+          "frameDurationsMs": [
+            1000
+          ],
+          "loop": true
+        }
+      }
+    },
+    "plant_leafy": {
+      "id": "plant_leafy",
+      "imageSrc": "assets/game/sprites/plant_leafy.png",
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 0.95,
+      "mirrorRightToLeft": false,
+      "clips": {
+        "default": {
+          "row": 0,
+          "frames": 1,
+          "frameDurationsMs": [
+            1000
+          ],
+          "loop": true
+        }
+      }
+    }
+  }
 }
