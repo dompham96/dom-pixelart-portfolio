@@ -496,6 +496,212 @@
           "loop": true
         }
       }
+    },
+    "ink_cat": {
+      "id": "ink_cat",
+      "imageSrc": "assets/game/sprites/ink_cat.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 1.0,
+      "mirrorRightToLeft": true,
+      "clips": {
+        "idle_right": {
+          "row": 0,
+          "frames": 8,
+          "frameDurationsMs": [
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140
+          ],
+          "loop": true
+        },
+        "idle_down": {
+          "row": 1,
+          "frames": 8,
+          "frameDurationsMs": [
+            160,
+            160,
+            160,
+            160,
+            160,
+            160,
+            160,
+            160
+          ],
+          "loop": true
+        },
+        "idle_up": {
+          "row": 1,
+          "frames": 8,
+          "frameDurationsMs": [
+            160,
+            160,
+            160,
+            160,
+            160,
+            160,
+            160,
+            160
+          ],
+          "loop": true
+        },
+        "walk_right": {
+          "row": 2,
+          "frames": 8,
+          "frameDurationsMs": [
+            105,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105
+          ],
+          "loop": true
+        },
+        "walk_down": {
+          "row": 2,
+          "frames": 8,
+          "frameDurationsMs": [
+            105,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105
+          ],
+          "loop": true
+        },
+        "walk_up": {
+          "row": 2,
+          "frames": 8,
+          "frameDurationsMs": [
+            105,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105
+          ],
+          "loop": true
+        },
+        "run_right": {
+          "row": 3,
+          "frames": 8,
+          "frameDurationsMs": [
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75
+          ],
+          "loop": true
+        },
+        "run_down": {
+          "row": 3,
+          "frames": 8,
+          "frameDurationsMs": [
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75
+          ],
+          "loop": true
+        },
+        "run_up": {
+          "row": 3,
+          "frames": 8,
+          "frameDurationsMs": [
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75,
+            75
+          ],
+          "loop": true
+        },
+        "play_right": {
+          "row": 4,
+          "frames": 8,
+          "frameDurationsMs": [
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          "loop": true
+        },
+        "play_down": {
+          "row": 4,
+          "frames": 8,
+          "frameDurationsMs": [
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          "loop": true
+        },
+        "play_up": {
+          "row": 4,
+          "frames": 8,
+          "frameDurationsMs": [
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100,
+            100
+          ],
+          "loop": true
+        },
+        "default": {
+          "row": 1,
+          "frames": 8,
+          "frameDurationsMs": [
+            160,
+            160,
+            160,
+            160,
+            160,
+            160,
+            160,
+            160
+          ],
+          "loop": true
+        }
+      }
     }
   }
 }
