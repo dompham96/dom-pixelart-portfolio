@@ -12,6 +12,7 @@ import {
   Sunset,
   Moon,
   Clock,
+  Shirt,
 } from 'lucide-react';
 import type { Locale, SeasonConfig, SeasonId } from '../types/content';
 import type { TimeOfDayState } from '../game/engine/TimeOfDay';
@@ -27,6 +28,7 @@ interface TopHudProps {
   audioEnabled: boolean;
   showDpad: boolean;
   onChangeMode: (mode: AppMode) => void;
+  onOpenCustomizer: () => void;
   onOpenMerch: () => void;
   onOpenAbout: () => void;
   onOpenContact: () => void;
@@ -45,6 +47,7 @@ export function TopHud({
   audioEnabled,
   showDpad,
   onChangeMode,
+  onOpenCustomizer,
   onOpenMerch,
   onOpenAbout,
   onOpenContact,
@@ -69,7 +72,7 @@ export function TopHud({
 
   return (
     <header className="fixed inset-x-0 top-0 z-30 border-b-2 border-[#3B3630] bg-[#131211]/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-1.5 px-2 py-2 sm:gap-2 sm:px-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-1 px-2 py-2 sm:gap-2 sm:px-4">
         {/* Brand home button */}
         <button
           id="hud-home-btn"
@@ -113,6 +116,18 @@ export function TopHud({
             <Grid2x2 className="h-3.5 w-3.5 shrink-0" />
             <span className="sm:hidden">{locale === 'vi' ? 'Tranh' : 'Art'}</span>
             <span className="hidden sm:inline">{locale === 'vi' ? 'Xem tranh' : 'Gallery'}</span>
+          </button>
+
+          <button
+            id="hud-avatar-btn"
+            type="button"
+            onClick={onOpenCustomizer}
+            className="pixel-btn flex shrink-0 items-center gap-1.5 whitespace-nowrap p-1.5 text-xs sm:px-3 sm:text-sm"
+            title={locale === 'vi' ? 'Tùy chỉnh nhân vật' : 'Customize Avatar'}
+            aria-label={locale === 'vi' ? 'Tùy chỉnh nhân vật' : 'Customize Avatar'}
+          >
+            <Shirt className="h-3.5 w-3.5 text-[#FFCF3D]" />
+            <span className="hidden lg:inline">{locale === 'vi' ? 'Trang phục' : 'Avatar'}</span>
           </button>
 
           <button
@@ -170,7 +185,7 @@ export function TopHud({
               >
                 {renderTimeIcon()}
                 <span className="font-mono-code hidden lg:inline">{timeState.label[locale]}</span>
-                <span className="font-mono-code lg:hidden">{timeState.clockText}</span>
+                <span className="font-mono-code hidden sm:inline lg:hidden">{timeState.clockText}</span>
               </button>
 
               <button

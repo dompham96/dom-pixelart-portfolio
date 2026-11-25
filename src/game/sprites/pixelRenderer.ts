@@ -748,7 +748,7 @@ function drawProceduralCharacter(
   }
 }
 
-function drawNpcEmote(
+export function drawNpcEmote(
   ctx: CanvasRenderingContext2D,
   px: number,
   baseY: number,

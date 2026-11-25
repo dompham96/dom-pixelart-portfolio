@@ -1,6 +1,8 @@
 import type {
   CharacterAnimState,
+  CharacterAppearance,
   Direction,
+  Facing8,
   LocalizedText,
   MapDefinition,
   MapProp,
@@ -10,12 +12,35 @@ import type {
   SurfaceType,
   TimeOfDayMode,
 } from '../../types/content';
-import { drawCharacter, drawProp, drawTile } from '../sprites/pixelRenderer';
+import { DOM_NPC_APPEARANCE } from '../../data/characterOptions';
+import { drawCharacter, drawNpcEmote, drawProp, drawTile } from '../sprites/pixelRenderer';
+import {
+  drawBaseCharacterSprite,
+  preloadBaseCharacterSheets,
+} from '../sprites/baseCharacterRenderer';
 import { spriteManager } from '../sprites/SpriteManager';
 import { findPath, type GridPoint } from './Pathfinder';
 import { NpcController } from './NpcController';
 import { evaluateTimeOfDay, type TimeOfDayState } from './TimeOfDay';
 import { soundEngine } from '../../audio/SoundEngine';
+
+function vectorToFacing8(dx: number, dy: number, fallback: Facing8): Facing8 {
+  if (dx === 0 && dy === 0) return fallback;
+  const ax = Math.abs(dx);
+  const ay = Math.abs(dy);
+  if (ax > 0.25 && ay > 0.25 && Math.min(ax, ay) / Math.max(ax, ay) > 0.4) {
+    if (dx > 0 && dy > 0) return 'down_right';
+    if (dx < 0 && dy > 0) return 'down_left';
+    if (dx > 0 && dy < 0) return 'up_right';
+    return 'up_left';
+  }
+  if (ax >= ay) return dx > 0 ? 'right' : 'left';
+  return dy > 0 ? 'down' : 'up';
+}
+
+function isHumanoidNpc(entity: NpcEntity): boolean {
+  return entity.isHumanoid === true || entity.spriteKey === 'dom';
+}
 
 export type InteractionEvent =
   | { kind: 'prop'; prop: MapProp }
@@ -74,9 +99,12 @@ export class GameEngine {
   // Player state in world pixel coords (1 tile = map.tileSize = 16px)
   private playerX: number;
   private playerY: number;
-  private facing: Direction;
+  private facing: Facing8;
   private walkPhase = 0;
   private playerAnimState: CharacterAnimState = 'idle';
+  private playerAppearance: CharacterAppearance;
+  private jumpTimer = 0;
+  private interactTimer = 0;
   private stepSoundCooldown = 0;
   private dustCooldown = 0;
 
@@ -111,7 +139,8 @@ export class GameEngine {
     onInteract: (event: InteractionEvent) => void,
     onNearbyChange: (prompt: NearbyPrompt | null) => void,
     onZoneChange?: (zone: MapZone | null) => void,
-    onTimeStateChange?: (state: TimeOfDayState) => void
+    onTimeStateChange?: (state: TimeOfDayState) => void,
+    playerAppearance: CharacterAppearance = DOM_NPC_APPEARANCE
   ) {
     this.canvas = canvas;
     const ctx = canvas.getContext('2d');
@@ -131,12 +160,14 @@ export class GameEngine {
     this.onNearbyChange = onNearbyChange;
     this.onZoneChange = onZoneChange;
     this.onTimeStateChange = onTimeStateChange;
+    this.playerAppearance = playerAppearance;
 
     this.playerX = map.spawn.x * map.tileSize;
     this.playerY = map.spawn.y * map.tileSize;
     this.facing = map.spawn.facing;
 
     spriteManager.init();
+    void preloadBaseCharacterSheets();
     this.preloadMapAssets();
 
     this.npcController = new NpcController(map, this.timeState.domActivity);
@@ -174,6 +205,10 @@ export class GameEngine {
     this.timeState = evaluateTimeOfDay(mode);
     this.onTimeStateChange?.(this.timeState);
     soundEngine.setEnvironment(this.season.id, this.timeState.period, Boolean(this.lastIndoors));
+  }
+
+  public setPlayerAppearance(appearance: CharacterAppearance): void {
+    this.playerAppearance = appearance;
   }
 
   public setPaused(paused: boolean): void {
@@ -231,6 +266,10 @@ export class GameEngine {
       if (code !== 'ShiftLeft' && code !== 'ShiftRight') {
         this.path = [];
         this.pendingInteraction = null;
+      }
+    } else if (code === 'KeyJ') {
+      if (this.jumpTimer <= 0) {
+        this.jumpTimer = 0.45;
       }
     } else if (code === 'KeyE' || code === 'Space' || code === 'Enter') {
       this.triggerInteract();
@@ -361,6 +400,11 @@ export class GameEngine {
     let targetTile = { x: tx, y: ty };
 
     const tappedNpc = this.npcController.getRuntimeNpcs().find((r) => {
+      if (isHumanoidNpc(r.entity)) {
+        const dxHit = Math.abs(r.px + ts / 2 - worldX);
+        const withinY = worldY >= r.py - ts * 0.95 && worldY <= r.py + ts;
+        return dxHit <= ts * 0.7 && withinY;
+      }
       const dist = Math.hypot(r.px + ts / 2 - worldX, r.py + ts / 2 - worldY);
       return dist <= ts * 0.9;
     });
@@ -398,6 +442,7 @@ export class GameEngine {
     ) {
       this.path = [];
       this.pendingInteraction = null;
+      this.interactTimer = 0.35;
       soundEngine.playChime();
       this.onInteract(tappedEvent);
       return;
@@ -418,6 +463,7 @@ export class GameEngine {
 
   public triggerInteract(): void {
     if (this.paused || !this.currentNearby) return;
+    this.interactTimer = 0.35;
     soundEngine.playChime();
     this.onInteract(this.currentNearby.event);
   }
@@ -484,6 +530,9 @@ export class GameEngine {
 
     if (this.paused) return;
 
+    if (this.jumpTimer > 0) this.jumpTimer = Math.max(0, this.jumpTimer - dt);
+    if (this.interactTimer > 0) this.interactTimer = Math.max(0, this.interactTimer - dt);
+
     const wantRun = this.isRunRequested();
     const speed = wantRun ? 106 : 64;
     let isMoving = false;
@@ -494,11 +543,7 @@ export class GameEngine {
       const vx = (dx / len) * speed * dt;
       const vy = (dy / len) * speed * dt;
 
-      if (Math.abs(dx) >= Math.abs(dy)) {
-        this.facing = dx > 0 ? 'right' : 'left';
-      } else {
-        this.facing = dy > 0 ? 'down' : 'up';
-      }
+      this.facing = vectorToFacing8(dx, dy, this.facing);
 
       if (!this.isRectBlocked(this.playerX + vx, this.playerY)) {
         this.playerX += vx;
@@ -524,23 +569,29 @@ export class GameEngine {
         if (this.path.length === 0 && this.pendingInteraction) {
           const event = this.pendingInteraction;
           this.pendingInteraction = null;
+          this.interactTimer = 0.35;
           soundEngine.playChime();
           this.onInteract(event);
         }
       } else {
         this.playerX += (diffX / dist) * speed * dt;
         this.playerY += (diffY / dist) * speed * dt;
-        if (Math.abs(diffX) >= Math.abs(diffY)) {
-          this.facing = diffX > 0 ? 'right' : 'left';
-        } else {
-          this.facing = diffY > 0 ? 'down' : 'up';
-        }
+        this.facing = vectorToFacing8(diffX, diffY, this.facing);
         isMoving = true;
       }
     }
 
     const isRunningNow = isMoving && wantRun;
-    this.playerAnimState = isRunningNow ? 'run' : isMoving ? 'walk' : 'idle';
+    this.playerAnimState =
+      this.jumpTimer > 0
+        ? 'jump'
+        : this.interactTimer > 0
+          ? 'interact'
+          : isRunningNow
+            ? 'run'
+            : isMoving
+              ? 'walk'
+              : 'idle';
 
     const ptx = Math.floor((this.playerX + this.map.tileSize / 2) / this.map.tileSize);
     const pty = Math.floor((this.playerY + this.map.tileSize / 2) / this.map.tileSize);
@@ -804,38 +855,91 @@ export class GameEngine {
 
     for (const runtime of this.npcController.getRuntimeNpcs()) {
       const isNearby = this.currentNearby?.id === `npc:${runtime.entity.id}`;
-      drawList.push({
-        sortY: runtime.py,
-        draw: () =>
-          drawCharacter(
-            ctx,
-            runtime.entity.spriteKey,
-            Math.round(runtime.px),
-            Math.round(runtime.py),
-            runtime.facing,
-            runtime.walkPhase,
-            runtime.animState,
-            isNearby,
-            this.elapsed,
-            runtime.emote
-          ),
-      });
+      const rpx = Math.round(runtime.px);
+      const rpy = Math.round(runtime.py);
+
+      if (isHumanoidNpc(runtime.entity)) {
+        const appearance = runtime.entity.appearance || DOM_NPC_APPEARANCE;
+        drawList.push({
+          sortY: runtime.py,
+          draw: () => {
+            // Subtle ground shadow anchored on 16x16 floor tile
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.36)';
+            ctx.fillRect(rpx + 4, rpy + 13, 8, 3);
+            drawBaseCharacterSprite(
+              ctx,
+              appearance,
+              runtime.animState,
+              runtime.facing,
+              this.elapsed,
+              rpx + 8,
+              rpy + 15,
+              1
+            );
+            // Floating activity emote (Zzz / Heart / Gaming / Alert) cleanly above 16x32 head
+            if (runtime.emote) {
+              drawNpcEmote(ctx, rpx, rpy - 18, runtime.emote, this.elapsed);
+            } else if (isNearby) {
+              const bob = Math.round(Math.sin(this.elapsed * 6) * 1.5);
+              const bx = rpx + 3;
+              const by = rpy - 24 + bob;
+              ctx.fillStyle = '#131211';
+              ctx.fillRect(bx, by, 10, 8);
+              ctx.fillStyle = '#f5efe6';
+              ctx.fillRect(bx + 1, by + 1, 8, 6);
+              ctx.fillStyle = '#131211';
+              ctx.fillRect(bx + 2, by + 3, 1, 2);
+              ctx.fillRect(bx + 5, by + 3, 1, 2);
+              ctx.fillRect(bx + 7, by + 3, 1, 2);
+            }
+          },
+        });
+      } else {
+        drawList.push({
+          sortY: runtime.py,
+          draw: () =>
+            drawCharacter(
+              ctx,
+              runtime.entity.spriteKey,
+              rpx,
+              rpy,
+              runtime.facing,
+              runtime.walkPhase,
+              runtime.animState,
+              isNearby,
+              this.elapsed,
+              runtime.emote
+            ),
+        });
+      }
     }
 
+    const ppx = Math.round(this.playerX);
+    const ppy = Math.round(this.playerY);
     drawList.push({
       sortY: this.playerY,
-      draw: () =>
-        drawCharacter(
+      draw: () => {
+        // Ground shadow shrinks slightly when jumping
+        const sw = this.jumpTimer > 0 ? 6 : 8;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+        ctx.fillRect(ppx + Math.floor((16 - sw) / 2), ppy + 13, sw, 3);
+        const animTime =
+          this.playerAnimState === 'jump'
+            ? 0.45 - this.jumpTimer
+            : this.playerAnimState === 'interact'
+              ? 0.35 - this.interactTimer
+              : this.elapsed;
+        drawBaseCharacterSprite(
           ctx,
-          'player',
-          Math.round(this.playerX),
-          Math.round(this.playerY),
-          this.facing,
-          this.walkPhase,
+          this.playerAppearance,
           this.playerAnimState,
-          false,
-          this.elapsed
-        ),
+          this.facing,
+          animTime,
+          ppx + 8,
+          ppy + 15,
+          1
+        );
+      },
     });
 
     drawList.sort((a, b) => a.sortY - b.sortY);

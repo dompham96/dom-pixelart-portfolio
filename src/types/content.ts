@@ -69,11 +69,45 @@ export interface SiteProfile {
 
 export type Direction = 'down' | 'up' | 'left' | 'right';
 
+export type Facing8 =
+  | 'down'
+  | 'down_right'
+  | 'right'
+  | 'up_right'
+  | 'up'
+  | 'up_left'
+  | 'left'
+  | 'down_left';
+
 export type TimeOfDayMode = 'auto' | 'morning' | 'sunset' | 'night' | 'late_night';
 export type TimePeriod = 'day' | 'sunset' | 'night';
-export type CharacterAnimState = 'idle' | 'walk' | 'run' | 'sleep' | 'work' | 'gaming' | 'play';
+export type CharacterAnimState =
+  | 'idle'
+  | 'walk'
+  | 'run'
+  | 'interact'
+  | 'jump'
+  | 'sleep'
+  | 'work'
+  | 'gaming'
+  | 'play';
 export type SurfaceType = 'grass' | 'stone' | 'wood' | 'carpet';
 export type MapZoneId = 'yard' | 'living_gallery' | 'studio_bedroom' | 'kitchen';
+
+export type HairStyle = 'none' | 'short' | 'bob' | 'ponytail' | 'curly' | 'long';
+export type OutfitStyle = 'tee' | 'hoodie' | 'overalls' | 'jacket' | 'apron';
+export type AccessoryStyle = 'none' | 'cap' | 'beanie' | 'glasses' | 'scarf' | 'headphones' | 'cat_ears';
+
+export interface CharacterAppearance {
+  baseTone: string;
+  hairStyle: HairStyle;
+  hairColor: string;
+  outfitStyle: OutfitStyle;
+  topColor: string;
+  pantsColor: string;
+  accessory: AccessoryStyle;
+  accessoryColor: string;
+}
 
 export type TileType =
   | 'void'
@@ -193,6 +227,8 @@ export interface NpcEntity {
   id: string;
   name: LocalizedText;
   spriteKey: 'dom' | 'ink_cat' | 'task_snake';
+  isHumanoid?: boolean;
+  appearance?: CharacterAppearance;
   x: number;
   y: number;
   facing: Direction;

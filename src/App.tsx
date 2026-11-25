@@ -1,6 +1,17 @@
 import { useCallback, useState } from 'react';
-import type { ArtworkCollection, Locale, SeasonId, TimeOfDayMode } from './types/content';
+import type {
+  ArtworkCollection,
+  CharacterAppearance,
+  Locale,
+  SeasonId,
+  TimeOfDayMode,
+} from './types/content';
 import { DEFAULT_ACTIVE_SEASON, getCollectionById, seasons } from './data';
+import {
+  loadOrCreateVisitorAppearance,
+  randomizeAppearance,
+  saveVisitorAppearance,
+} from './data/characterOptions';
 import { soundEngine } from './audio/SoundEngine';
 import { evaluateTimeOfDay, TIME_MODE_ORDER, type TimeOfDayState } from './game/engine/TimeOfDay';
 import { TitleScreen } from './components/TitleScreen';
@@ -10,6 +21,7 @@ import { QuickGallery } from './components/QuickGallery';
 import { ArtworkLightbox } from './components/ArtworkLightbox';
 import { DialogBox, type ActiveDialog } from './components/DialogBox';
 import { AboutModal, ContactModal, MerchModal } from './components/InfoModals';
+import { CharacterCustomizerModal } from './components/CharacterCustomizerModal';
 import type { InteractionEvent } from './game/engine/GameEngine';
 
 type OverlayState =
@@ -17,7 +29,8 @@ type OverlayState =
   | { kind: 'artwork'; collection: ArtworkCollection }
   | { kind: 'merch'; highlightId?: string }
   | { kind: 'about' }
-  | { kind: 'contact' };
+  | { kind: 'contact' }
+  | { kind: 'customizer' };
 
 export function App() {
   const [mode, setMode] = useState<AppMode>('title');
@@ -29,11 +42,26 @@ export function App() {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [userMutedAudio, setUserMutedAudio] = useState(false);
   const [showDpad, setShowDpad] = useState(false);
+  const [playerAppearance, setPlayerAppearance] = useState<CharacterAppearance>(() =>
+    loadOrCreateVisitorAppearance()
+  );
 
   const [overlay, setOverlay] = useState<OverlayState>({ kind: 'none' });
   const [activeDialog, setActiveDialog] = useState<ActiveDialog | null>(null);
 
   const currentSeason = seasons[seasonId];
+
+  const handleChangeAppearance = useCallback((next: CharacterAppearance) => {
+    setPlayerAppearance(next);
+    saveVisitorAppearance(next);
+  }, []);
+
+  const handleRandomizeAppearance = useCallback(() => {
+    const next = randomizeAppearance();
+    setPlayerAppearance(next);
+    saveVisitorAppearance(next);
+    soundEngine.playChime();
+  }, []);
 
   const switchMode = useCallback((next: AppMode) => {
     setActiveDialog(null);
@@ -145,8 +173,11 @@ export function App() {
         <TitleScreen
           locale={locale}
           season={currentSeason}
+          playerAppearance={playerAppearance}
           onStartGame={handleStartGame}
           onOpenGallery={handleOpenGallery}
+          onOpenCustomizer={() => setOverlay({ kind: 'customizer' })}
+          onRandomizeAppearance={handleRandomizeAppearance}
         />
       )}
 
@@ -159,6 +190,7 @@ export function App() {
           audioEnabled={audioEnabled}
           showDpad={showDpad}
           onChangeMode={switchMode}
+          onOpenCustomizer={() => setOverlay({ kind: 'customizer' })}
           onOpenMerch={() => setOverlay({ kind: 'merch' })}
           onOpenAbout={() => setOverlay({ kind: 'about' })}
           onOpenContact={() => setOverlay({ kind: 'contact' })}
@@ -176,6 +208,7 @@ export function App() {
           locale={locale}
           season={currentSeason}
           timeMode={timeMode}
+          playerAppearance={playerAppearance}
           active={mode === 'game'}
           paused={isGamePaused}
           showDpad={showDpad}
@@ -202,6 +235,15 @@ export function App() {
       )}
 
       {/* Modals */}
+      {overlay.kind === 'customizer' && (
+        <CharacterCustomizerModal
+          locale={locale}
+          appearance={playerAppearance}
+          onChange={handleChangeAppearance}
+          onClose={() => setOverlay({ kind: 'none' })}
+        />
+      )}
+
       {overlay.kind === 'artwork' && (
         <ArtworkLightbox
           collection={overlay.collection}

@@ -1,7 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Direction, Locale, MapZone, SeasonConfig, TimeOfDayMode } from '../types/content';
+import type {
+  CharacterAppearance,
+  Direction,
+  Locale,
+  MapZone,
+  SeasonConfig,
+  TimeOfDayMode,
+} from '../types/content';
 import type { TimeOfDayState } from '../game/engine/TimeOfDay';
 import { domHouseMap } from '../data';
+import { DOM_NPC_APPEARANCE } from '../data/characterOptions';
 import { GameEngine, type InteractionEvent, type NearbyPrompt } from '../game/engine/GameEngine';
 import { MobileControls } from './MobileControls';
 
@@ -9,6 +17,7 @@ interface GameViewProps {
   locale: Locale;
   season: SeasonConfig;
   timeMode: TimeOfDayMode;
+  playerAppearance?: CharacterAppearance;
   active: boolean;
   paused: boolean;
   showDpad: boolean;
@@ -20,6 +29,7 @@ export function GameView({
   locale,
   season,
   timeMode,
+  playerAppearance = DOM_NPC_APPEARANCE,
   active,
   paused,
   showDpad,
@@ -53,7 +63,8 @@ export function GameView({
       (ev) => interactRef.current(ev),
       (prompt) => setNearby(prompt),
       (zone) => setCurrentZone(zone),
-      (state) => timeStateCbRef.current(state)
+      (state) => timeStateCbRef.current(state),
+      playerAppearance
     );
     engineRef.current = engine;
 
@@ -89,6 +100,10 @@ export function GameView({
   useEffect(() => {
     engineRef.current?.setTimeMode(timeMode);
   }, [timeMode]);
+
+  useEffect(() => {
+    engineRef.current?.setPlayerAppearance(playerAppearance);
+  }, [playerAppearance]);
 
   useEffect(() => {
     engineRef.current?.setPaused(paused);

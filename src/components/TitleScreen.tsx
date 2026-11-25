@@ -1,21 +1,28 @@
 import { useEffect, useRef } from 'react';
-import { Play, Grid2x2 } from 'lucide-react';
-import type { Locale, SeasonConfig } from '../types/content';
+import { Play, Grid2x2, Shirt, Dices } from 'lucide-react';
+import type { CharacterAppearance, Locale, SeasonConfig } from '../types/content';
 import { domHouseMap, siteProfile } from '../data';
 import { drawProp, drawTile } from '../game/sprites/pixelRenderer';
+import { CharacterPreviewCanvas } from './CharacterPreviewCanvas';
 
 interface TitleScreenProps {
   locale: Locale;
   season: SeasonConfig;
+  playerAppearance: CharacterAppearance;
   onStartGame: () => void;
   onOpenGallery: () => void;
+  onOpenCustomizer: () => void;
+  onRandomizeAppearance: () => void;
 }
 
 export function TitleScreen({
   locale,
   season,
+  playerAppearance,
   onStartGame,
   onOpenGallery,
+  onOpenCustomizer,
+  onRandomizeAppearance,
 }: TitleScreenProps) {
   const bgCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -124,7 +131,7 @@ export function TitleScreen({
   }, [season]);
 
   return (
-    <main className="relative flex min-h-dvh w-full flex-col items-center justify-center overflow-hidden px-6 py-12">
+    <main className="relative flex min-h-dvh w-full flex-col items-center justify-center overflow-hidden px-6 py-10">
       <canvas
         ref={bgCanvasRef}
         aria-hidden="true"
@@ -132,7 +139,7 @@ export function TitleScreen({
       />
 
       {/* Minimalist Game Title / Loading Screen Composition */}
-      <section className="relative z-10 flex w-full max-w-3xl flex-col items-center gap-12 text-center sm:gap-16">
+      <section className="relative z-10 flex w-full max-w-3xl flex-col items-center gap-9 text-center sm:gap-12">
         {/* Game Logo Typography */}
         <div className="flex flex-col items-center">
           <div className="mb-4 flex items-center gap-3" aria-hidden="true">
@@ -150,7 +157,7 @@ export function TitleScreen({
           </p>
         </div>
 
-        {/* Two Game Menu Actions Only: Start & Quick View */}
+        {/* Two Game Menu Actions: Start & Quick View */}
         <div className="flex w-full max-w-[260px] flex-col gap-3.5 sm:max-w-none sm:flex-row sm:justify-center sm:gap-5">
           <button
             id="btn-start-game"
@@ -171,6 +178,46 @@ export function TitleScreen({
             <Grid2x2 className="h-4 w-4 text-[#FFCF3D] transition-transform group-hover:scale-110" />
             <span>{locale === 'vi' ? 'XEM NHANH' : 'QUICK VIEW'}</span>
           </button>
+        </div>
+
+        {/* Sleek Visitor Avatar Pill (Randomly generated + quick customize) */}
+        <div className="flex items-center gap-3 border-2 border-[#3B3630] bg-[#131211]/85 px-3.5 py-2 backdrop-blur-sm">
+          <div className="flex h-14 w-12 shrink-0 items-center justify-center border border-[#3B3630] bg-[#1C1B19]">
+            <CharacterPreviewCanvas
+              appearance={playerAppearance}
+              anim="idle"
+              facing="down"
+              scale={2}
+              width={48}
+              height={56}
+            />
+          </div>
+          <div className="text-left">
+            <div className="font-pixel text-xs text-[#F5EFE6] sm:text-sm">
+              {locale === 'vi' ? 'Nhân vật của bạn' : 'Your Visitor Avatar'}
+            </div>
+            <div className="mt-1.5 flex items-center gap-1.5">
+              <button
+                id="btn-title-customize"
+                type="button"
+                onClick={onOpenCustomizer}
+                className="pixel-btn flex items-center gap-1.5 px-2.5 py-1 text-xs"
+              >
+                <Shirt className="h-3.5 w-3.5 text-[#FFCF3D]" />
+                <span>{locale === 'vi' ? 'Đổi trang phục' : 'Customize'}</span>
+              </button>
+              <button
+                id="btn-title-randomize"
+                type="button"
+                onClick={onRandomizeAppearance}
+                className="pixel-btn flex items-center justify-center p-1.5 text-xs"
+                title={locale === 'vi' ? 'Tạo ngẫu nhiên' : 'Randomize look'}
+                aria-label={locale === 'vi' ? 'Tạo ngẫu nhiên' : 'Randomize look'}
+              >
+                <Dices className="h-3.5 w-3.5 text-[#FFCF3D]" />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     </main>

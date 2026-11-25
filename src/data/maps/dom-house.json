@@ -565,6 +565,17 @@
       "id": "dom",
       "name": { "vi": "Dom (Phú Sỹ)", "en": "Dom (Phú Sỹ)" },
       "spriteKey": "dom",
+      "isHumanoid": true,
+      "appearance": {
+        "baseTone": "#faf3e8",
+        "hairStyle": "short",
+        "hairColor": "#382a26",
+        "outfitStyle": "hoodie",
+        "topColor": "#ffcf3d",
+        "pantsColor": "#3a3836",
+        "accessory": "cap",
+        "accessoryColor": "#262322"
+      },
       "aiRole": "dom_schedule",
       "x": 21,
       "y": 5,
