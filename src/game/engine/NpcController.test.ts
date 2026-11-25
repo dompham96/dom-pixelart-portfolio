@@ -26,13 +26,12 @@ describe('NpcController', () => {
     const dom = ctrl.getNpcById('dom')!;
     const ts = domHouseMap.tileSize;
 
-    // Simulate switching to sleep (03:00-09:00)
     for (let i = 0; i < 400; i++) {
       ctrl.update({
         dt: 0.05,
         domActivity: 'sleep',
-        playerX: 10 * ts,
-        playerY: 21 * ts,
+        playerX: 11 * ts,
+        playerY: 28 * ts,
         playerIndoors: false,
         playerIsRunning: false,
         isTileSolidForNpc: isSolid,
@@ -45,13 +44,12 @@ describe('NpcController', () => {
     expect(Math.round(dom.py / ts)).toBe(bed.y);
     expect(dom.animState).toBe('sleep');
 
-    // Simulate switching to gaming (17:00-03:00)
     for (let i = 0; i < 400; i++) {
       ctrl.update({
         dt: 0.05,
         domActivity: 'gaming',
-        playerX: 10 * ts,
-        playerY: 21 * ts,
+        playerX: 11 * ts,
+        playerY: 28 * ts,
         playerIndoors: false,
         playerIsRunning: false,
         isTileSolidForNpc: isSolid,
@@ -65,8 +63,8 @@ describe('NpcController', () => {
     expect(dom.animState).toBe('gaming');
   });
 
-  it('makes Cat Ink run to greet, meow, and follow visitor inside the house without blocking', () => {
-    const ctrl = new NpcController(domHouseMap, 'gaming', () => 0.5);
+  it('makes Cat Ink greet a new visitor, follow briefly, then wander off to play elsewhere', () => {
+    const ctrl = new NpcController(domHouseMap, 'gaming', () => 0.4);
     const cat = ctrl.getNpcById('ink_cat')!;
     const ts = domHouseMap.tileSize;
     const onMeow = vi.fn();
@@ -74,8 +72,8 @@ describe('NpcController', () => {
     expect(cat.blocksPlayer).toBe(false);
     expect(cat.catState).toBe('roaming');
 
-    // Visitor steps inside the living room doorway (11, 13)
-    for (let i = 0; i < 160; i++) {
+    // Visitor enters Living Room Gallery -> Cat runs to greet, meows, and enters short follow
+    for (let i = 0; i < 120; i++) {
       ctrl.update({
         dt: 0.05,
         domActivity: 'gaming',
@@ -83,28 +81,50 @@ describe('NpcController', () => {
         playerY: 13 * ts,
         playerIndoors: true,
         playerIsRunning: false,
+        playerZoneId: 'living_gallery',
+        visitorId: 'visitor_1',
         isTileSolidForNpc: isSolid,
         isTileIndoors: isIndoors,
         onCatMeow: onMeow,
       });
     }
-
     expect(onMeow).toHaveBeenCalledTimes(1);
     expect(cat.catState).toBe('following');
 
-    // Visitor walks back outside -> Cat returns to roaming inside
+    // After hanging out >6s, visitor moves into another room -> Cat wanders off to play elsewhere!
+    for (let i = 0; i < 140; i++) {
+      ctrl.update({
+        dt: 0.05,
+        domActivity: 'gaming',
+        playerX: 22 * ts,
+        playerY: 8 * ts,
+        playerIndoors: true,
+        playerIsRunning: false,
+        playerZoneId: 'kitchen',
+        visitorId: 'visitor_1',
+        isTileSolidForNpc: isSolid,
+        isTileIndoors: isIndoors,
+        onCatMeow: onMeow,
+      });
+    }
+    expect(cat.catState).toBe('roaming');
+    expect(cat.greetCooldown).toBeGreaterThan(0);
+
+    // When a brand-new visitor arrives (future multi-visitor support), Cat immediately goes to greet them!
     ctrl.update({
       dt: 0.05,
       domActivity: 'gaming',
       playerX: 11 * ts,
-      playerY: 20 * ts,
-      playerIndoors: false,
+      playerY: 13 * ts,
+      playerIndoors: true,
       playerIsRunning: false,
+      playerZoneId: 'living_gallery',
+      visitorId: 'visitor_2',
       isTileSolidForNpc: isSolid,
       isTileIndoors: isIndoors,
       onCatMeow: onMeow,
     });
-    expect(cat.catState).toBe('roaming');
+    expect(cat.catState).toBe('greeting');
   });
 
   it('triggers random Dom + Cat playtime during work hours and keeps Cat with Dom', () => {
@@ -113,13 +133,12 @@ describe('NpcController', () => {
     const cat = ctrl.getNpcById('ink_cat')!;
     const ts = domHouseMap.tileSize;
 
-    // Fast-forward past initial 16s playtime cooldown
     for (let i = 0; i < 360; i++) {
       ctrl.update({
         dt: 0.05,
         domActivity: 'work',
-        playerX: 10 * ts,
-        playerY: 21 * ts,
+        playerX: 11 * ts,
+        playerY: 28 * ts,
         playerIndoors: false,
         playerIsRunning: false,
         isTileSolidForNpc: isSolid,
@@ -131,14 +150,14 @@ describe('NpcController', () => {
     expect(dom.domActivity).toBe('play_cat');
     expect(cat.catState).toBe('playing_with_dom');
 
-    // Even if visitor enters while Dom is playing with Cat, Cat stays with Dom first
     ctrl.update({
       dt: 0.05,
       domActivity: 'work',
-      playerX: 10 * ts,
-      playerY: 14 * ts,
+      playerX: 11 * ts,
+      playerY: 13 * ts,
       playerIndoors: true,
       playerIsRunning: false,
+      playerZoneId: 'living_gallery',
       isTileSolidForNpc: isSolid,
       isTileIndoors: isIndoors,
       onCatMeow: () => {},

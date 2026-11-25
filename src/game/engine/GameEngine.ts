@@ -633,6 +633,7 @@ export class GameEngine {
       playerY: this.playerY,
       playerIndoors,
       playerIsRunning: isRunningNow,
+      playerZoneId: this.lastZoneId,
       isTileSolidForNpc: (tx, ty) => this.isTileStaticSolid(tx, ty),
       isTileIndoors: (tx, ty) => this.isTileIndoors(tx, ty),
       onCatMeow: () => soundEngine.playMeow(),

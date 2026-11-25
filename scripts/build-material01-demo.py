@@ -136,17 +136,22 @@ def extract_tree_and_prop_sprites() -> dict[str, dict]:
     for sid, src_img, col, row, wt, ht, ax, ay in extractions:
         crop = crop_tiles(src_img, col, row, wt, ht)
         is_foliage = sid.startswith("tree_") or sid.startswith("bush_")
-        fw, fh = crop.width, crop.height
         if is_foliage:
+            # Add 2px transparent horizontal padding on BOTH sides so +1px/-1px wind sway NEVER clips edge pixels!
+            pad_x = 2
+            fw, fh = crop.width + pad_x * 2, crop.height
+            base_frame = Image.new("RGBA", (fw, fh), (0, 0, 0, 0))
+            base_frame.paste(crop, (pad_x, 0), crop)
+
             split_y = int(fh * 0.68)
-            upper = crop.crop((0, 0, fw, split_y))
-            lower = crop.crop((0, split_y, fw, fh))
+            upper = crop.crop((0, 0, crop.width, split_y))
+            lower = crop.crop((0, split_y, crop.width, fh))
             swayed = Image.new("RGBA", (fw, fh), (0, 0, 0, 0))
-            swayed.paste(lower, (0, split_y), lower)
-            swayed.paste(upper, (1, 0), upper)
+            swayed.paste(lower, (pad_x, split_y), lower)
+            swayed.paste(upper, (pad_x + 1, 0), upper)
 
             sheet = Image.new("RGBA", (fw * 2, fh), (0, 0, 0, 0))
-            sheet.paste(crop, (0, 0), crop)
+            sheet.paste(base_frame, (0, 0), base_frame)
             sheet.paste(swayed, (fw, 0), swayed)
             sheet.save(SPRITE_OUT / f"{sid}.png")
             clips = {
@@ -158,6 +163,7 @@ def extract_tree_and_prop_sprites() -> dict[str, dict]:
                 }
             }
         else:
+            fw, fh = crop.width, crop.height
             crop.save(SPRITE_OUT / f"{sid}.png")
             clips = {
                 "default": {

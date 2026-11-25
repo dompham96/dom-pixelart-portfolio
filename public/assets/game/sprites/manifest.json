@@ -1,10 +1,306 @@
 {
   "version": 1,
   "sprites": {
+    "ink_cat": {
+      "id": "ink_cat",
+      "imageSrc": "assets/game/sprites/ink_cat.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "anchorX": 0.5,
+      "anchorY": 1.0,
+      "mirrorRightToLeft": true,
+      "clips": {
+        "idle_right": {
+          "row": 0,
+          "frames": 8,
+          "frameDurationsMs": [
+            180,
+            180,
+            180,
+            180,
+            180,
+            180,
+            180,
+            180
+          ],
+          "loop": true
+        },
+        "idle_down": {
+          "row": 0,
+          "frames": 8,
+          "frameDurationsMs": [
+            180,
+            180,
+            180,
+            180,
+            180,
+            180,
+            180,
+            180
+          ],
+          "loop": true
+        },
+        "idle_up": {
+          "row": 0,
+          "frames": 8,
+          "frameDurationsMs": [
+            180,
+            180,
+            180,
+            180,
+            180,
+            180,
+            180,
+            180
+          ],
+          "loop": true
+        },
+        "tail_wag_right": {
+          "row": 1,
+          "frames": 8,
+          "frameDurationsMs": [
+            135,
+            135,
+            135,
+            135,
+            135,
+            135,
+            135,
+            135
+          ],
+          "loop": true
+        },
+        "tail_wag_down": {
+          "row": 1,
+          "frames": 8,
+          "frameDurationsMs": [
+            135,
+            135,
+            135,
+            135,
+            135,
+            135,
+            135,
+            135
+          ],
+          "loop": true
+        },
+        "tail_wag_up": {
+          "row": 1,
+          "frames": 8,
+          "frameDurationsMs": [
+            135,
+            135,
+            135,
+            135,
+            135,
+            135,
+            135,
+            135
+          ],
+          "loop": true
+        },
+        "sit_right": {
+          "row": 2,
+          "frames": 8,
+          "frameDurationsMs": [
+            175,
+            175,
+            175,
+            175,
+            175,
+            175,
+            175,
+            175
+          ],
+          "loop": true
+        },
+        "sit_down": {
+          "row": 2,
+          "frames": 8,
+          "frameDurationsMs": [
+            175,
+            175,
+            175,
+            175,
+            175,
+            175,
+            175,
+            175
+          ],
+          "loop": true
+        },
+        "sit_up": {
+          "row": 2,
+          "frames": 8,
+          "frameDurationsMs": [
+            175,
+            175,
+            175,
+            175,
+            175,
+            175,
+            175,
+            175
+          ],
+          "loop": true
+        },
+        "walk_right": {
+          "row": 3,
+          "frames": 8,
+          "frameDurationsMs": [
+            90,
+            90,
+            90,
+            90,
+            90,
+            90,
+            90,
+            90
+          ],
+          "loop": true
+        },
+        "walk_down": {
+          "row": 3,
+          "frames": 8,
+          "frameDurationsMs": [
+            90,
+            90,
+            90,
+            90,
+            90,
+            90,
+            90,
+            90
+          ],
+          "loop": true
+        },
+        "walk_up": {
+          "row": 3,
+          "frames": 8,
+          "frameDurationsMs": [
+            90,
+            90,
+            90,
+            90,
+            90,
+            90,
+            90,
+            90
+          ],
+          "loop": true
+        },
+        "run_right": {
+          "row": 4,
+          "frames": 8,
+          "frameDurationsMs": [
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65
+          ],
+          "loop": true
+        },
+        "run_down": {
+          "row": 4,
+          "frames": 8,
+          "frameDurationsMs": [
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65
+          ],
+          "loop": true
+        },
+        "run_up": {
+          "row": 4,
+          "frames": 8,
+          "frameDurationsMs": [
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65,
+            65
+          ],
+          "loop": true
+        },
+        "play_right": {
+          "row": 5,
+          "frames": 8,
+          "frameDurationsMs": [
+            95,
+            95,
+            95,
+            95,
+            95,
+            95,
+            95,
+            95
+          ],
+          "loop": true
+        },
+        "play_down": {
+          "row": 5,
+          "frames": 8,
+          "frameDurationsMs": [
+            95,
+            95,
+            95,
+            95,
+            95,
+            95,
+            95,
+            95
+          ],
+          "loop": true
+        },
+        "play_up": {
+          "row": 5,
+          "frames": 8,
+          "frameDurationsMs": [
+            95,
+            95,
+            95,
+            95,
+            95,
+            95,
+            95,
+            95
+          ],
+          "loop": true
+        },
+        "default": {
+          "row": 2,
+          "frames": 8,
+          "frameDurationsMs": [
+            175,
+            175,
+            175,
+            175,
+            175,
+            175,
+            175,
+            175
+          ],
+          "loop": true
+        }
+      }
+    },
     "tree_oak_lg": {
       "id": "tree_oak_lg",
       "imageSrc": "assets/game/sprites/tree_oak_lg.png",
-      "frameWidth": 80,
+      "frameWidth": 84,
       "frameHeight": 128,
       "anchorX": 0.5,
       "anchorY": 0.96,
@@ -24,7 +320,7 @@
     "tree_oak_gold_lg": {
       "id": "tree_oak_gold_lg",
       "imageSrc": "assets/game/sprites/tree_oak_gold_lg.png",
-      "frameWidth": 80,
+      "frameWidth": 84,
       "frameHeight": 128,
       "anchorX": 0.5,
       "anchorY": 0.96,
@@ -44,7 +340,7 @@
     "tree_oak_md": {
       "id": "tree_oak_md",
       "imageSrc": "assets/game/sprites/tree_oak_md.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 96,
       "anchorX": 0.5,
       "anchorY": 0.96,
@@ -64,7 +360,7 @@
     "tree_oak_gold": {
       "id": "tree_oak_gold",
       "imageSrc": "assets/game/sprites/tree_oak_gold.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 96,
       "anchorX": 0.5,
       "anchorY": 0.96,
@@ -84,7 +380,7 @@
     "tree_oak_autumn": {
       "id": "tree_oak_autumn",
       "imageSrc": "assets/game/sprites/tree_oak_autumn.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 96,
       "anchorX": 0.5,
       "anchorY": 0.96,
@@ -104,7 +400,7 @@
     "tree_oak_sm": {
       "id": "tree_oak_sm",
       "imageSrc": "assets/game/sprites/tree_oak_sm.png",
-      "frameWidth": 64,
+      "frameWidth": 68,
       "frameHeight": 64,
       "anchorX": 0.5,
       "anchorY": 0.94,
@@ -124,7 +420,7 @@
     "tree_oak_gold_sm": {
       "id": "tree_oak_gold_sm",
       "imageSrc": "assets/game/sprites/tree_oak_gold_sm.png",
-      "frameWidth": 64,
+      "frameWidth": 68,
       "frameHeight": 64,
       "anchorX": 0.5,
       "anchorY": 0.94,
@@ -144,7 +440,7 @@
     "tree_pine_md": {
       "id": "tree_pine_md",
       "imageSrc": "assets/game/sprites/tree_pine_md.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 80,
       "anchorX": 0.5,
       "anchorY": 0.96,
@@ -164,7 +460,7 @@
     "tree_pine_teal": {
       "id": "tree_pine_teal",
       "imageSrc": "assets/game/sprites/tree_pine_teal.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 80,
       "anchorX": 0.5,
       "anchorY": 0.96,
@@ -184,7 +480,7 @@
     "tree_pine_dark": {
       "id": "tree_pine_dark",
       "imageSrc": "assets/game/sprites/tree_pine_dark.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 80,
       "anchorX": 0.5,
       "anchorY": 0.96,
@@ -204,7 +500,7 @@
     "tree_pine_sm": {
       "id": "tree_pine_sm",
       "imageSrc": "assets/game/sprites/tree_pine_sm.png",
-      "frameWidth": 32,
+      "frameWidth": 36,
       "frameHeight": 48,
       "anchorX": 0.5,
       "anchorY": 0.95,
@@ -224,7 +520,7 @@
     "tree_spruce_tall": {
       "id": "tree_spruce_tall",
       "imageSrc": "assets/game/sprites/tree_spruce_tall.png",
-      "frameWidth": 64,
+      "frameWidth": 68,
       "frameHeight": 144,
       "anchorX": 0.45,
       "anchorY": 0.97,
@@ -244,7 +540,7 @@
     "tree_spruce_gold": {
       "id": "tree_spruce_gold",
       "imageSrc": "assets/game/sprites/tree_spruce_gold.png",
-      "frameWidth": 64,
+      "frameWidth": 68,
       "frameHeight": 144,
       "anchorX": 0.45,
       "anchorY": 0.97,
@@ -283,7 +579,7 @@
     "bush_green_lg": {
       "id": "bush_green_lg",
       "imageSrc": "assets/game/sprites/bush_green_lg.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 48,
       "anchorX": 0.5,
       "anchorY": 0.88,
@@ -303,7 +599,7 @@
     "bush_olive_lg": {
       "id": "bush_olive_lg",
       "imageSrc": "assets/game/sprites/bush_olive_lg.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 48,
       "anchorX": 0.5,
       "anchorY": 0.88,
@@ -323,7 +619,7 @@
     "bush_gold_lg": {
       "id": "bush_gold_lg",
       "imageSrc": "assets/game/sprites/bush_gold_lg.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 48,
       "anchorX": 0.5,
       "anchorY": 0.88,
@@ -343,7 +639,7 @@
     "bush_green_md": {
       "id": "bush_green_md",
       "imageSrc": "assets/game/sprites/bush_green_md.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 32,
       "anchorX": 0.5,
       "anchorY": 0.88,
@@ -363,7 +659,7 @@
     "bush_olive_md": {
       "id": "bush_olive_md",
       "imageSrc": "assets/game/sprites/bush_olive_md.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 32,
       "anchorX": 0.5,
       "anchorY": 0.88,
@@ -383,7 +679,7 @@
     "bush_gold_md": {
       "id": "bush_gold_md",
       "imageSrc": "assets/game/sprites/bush_gold_md.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 32,
       "anchorX": 0.5,
       "anchorY": 0.88,
@@ -403,7 +699,7 @@
     "bush_autumn_md": {
       "id": "bush_autumn_md",
       "imageSrc": "assets/game/sprites/bush_autumn_md.png",
-      "frameWidth": 48,
+      "frameWidth": 52,
       "frameHeight": 32,
       "anchorX": 0.5,
       "anchorY": 0.88,
@@ -423,7 +719,7 @@
     "bush_sm": {
       "id": "bush_sm",
       "imageSrc": "assets/game/sprites/bush_sm.png",
-      "frameWidth": 32,
+      "frameWidth": 36,
       "frameHeight": 32,
       "anchorX": 0.5,
       "anchorY": 0.85,
@@ -492,212 +788,6 @@
           "frames": 1,
           "frameDurationsMs": [
             1000
-          ],
-          "loop": true
-        }
-      }
-    },
-    "ink_cat": {
-      "id": "ink_cat",
-      "imageSrc": "assets/game/sprites/ink_cat.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "anchorX": 0.5,
-      "anchorY": 1.0,
-      "mirrorRightToLeft": true,
-      "clips": {
-        "idle_right": {
-          "row": 0,
-          "frames": 8,
-          "frameDurationsMs": [
-            140,
-            140,
-            140,
-            140,
-            140,
-            140,
-            140,
-            140
-          ],
-          "loop": true
-        },
-        "idle_down": {
-          "row": 1,
-          "frames": 8,
-          "frameDurationsMs": [
-            160,
-            160,
-            160,
-            160,
-            160,
-            160,
-            160,
-            160
-          ],
-          "loop": true
-        },
-        "idle_up": {
-          "row": 1,
-          "frames": 8,
-          "frameDurationsMs": [
-            160,
-            160,
-            160,
-            160,
-            160,
-            160,
-            160,
-            160
-          ],
-          "loop": true
-        },
-        "walk_right": {
-          "row": 2,
-          "frames": 8,
-          "frameDurationsMs": [
-            105,
-            105,
-            105,
-            105,
-            105,
-            105,
-            105,
-            105
-          ],
-          "loop": true
-        },
-        "walk_down": {
-          "row": 2,
-          "frames": 8,
-          "frameDurationsMs": [
-            105,
-            105,
-            105,
-            105,
-            105,
-            105,
-            105,
-            105
-          ],
-          "loop": true
-        },
-        "walk_up": {
-          "row": 2,
-          "frames": 8,
-          "frameDurationsMs": [
-            105,
-            105,
-            105,
-            105,
-            105,
-            105,
-            105,
-            105
-          ],
-          "loop": true
-        },
-        "run_right": {
-          "row": 3,
-          "frames": 8,
-          "frameDurationsMs": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
-          ],
-          "loop": true
-        },
-        "run_down": {
-          "row": 3,
-          "frames": 8,
-          "frameDurationsMs": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
-          ],
-          "loop": true
-        },
-        "run_up": {
-          "row": 3,
-          "frames": 8,
-          "frameDurationsMs": [
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75,
-            75
-          ],
-          "loop": true
-        },
-        "play_right": {
-          "row": 4,
-          "frames": 8,
-          "frameDurationsMs": [
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100
-          ],
-          "loop": true
-        },
-        "play_down": {
-          "row": 4,
-          "frames": 8,
-          "frameDurationsMs": [
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100
-          ],
-          "loop": true
-        },
-        "play_up": {
-          "row": 4,
-          "frames": 8,
-          "frameDurationsMs": [
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100,
-            100
-          ],
-          "loop": true
-        },
-        "default": {
-          "row": 1,
-          "frames": 8,
-          "frameDurationsMs": [
-            160,
-            160,
-            160,
-            160,
-            160,
-            160,
-            160,
-            160
           ],
           "loop": true
         }

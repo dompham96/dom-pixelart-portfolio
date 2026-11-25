@@ -37,6 +37,22 @@ export interface RuntimeNpc {
   idleTimer: number;
   repathTimer: number;
   hasGreetedThisVisit: boolean;
+  /** Remaining seconds Cat will hang out with the newly arrived visitor before wandering off */
+  followTimeRemaining: number;
+  /** Elapsed seconds spent accompanying the current visitor */
+  followElapsed: number;
+  /** Zone where Cat started accompanying the visitor */
+  followStartZoneId: string | null;
+  /** Cooldown before re-greeting the same visitor (multi-visitor ready) */
+  greetCooldown: number;
+  /** Visitor ID currently greeted/accompanied (supports future multi-visitor setups) */
+  activeVisitorId: string | null;
+  /** Preferred resting animation pose while paused ('sit' | 'tail_wag' | 'idle') */
+  restPose: 'sit' | 'tail_wag' | 'idle';
+  /** Timer for Cat playfully circling / changing poses near the visitor */
+  followFidgetTimer: number;
+  /** Whether current roaming sprint is a playful "zoomies" run */
+  roamZoomies: boolean;
 }
 
 export interface NpcUpdateContext {
@@ -46,6 +62,8 @@ export interface NpcUpdateContext {
   playerY: number;
   playerIndoors: boolean;
   playerIsRunning: boolean;
+  playerZoneId?: string | null;
+  visitorId?: string;
   isTileSolidForNpc: (tx: number, ty: number) => boolean;
   isTileIndoors: (tx: number, ty: number) => boolean;
   onCatMeow: () => void;
@@ -67,7 +85,7 @@ function facingToward(fromX: number, fromY: number, toX: number, toY: number): D
 export class NpcController {
   private map: MapDefinition;
   private npcs: RuntimeNpc[] = [];
-  private domPlayCooldown = 16; // Seconds before Dom randomly plays with Cat during work hours
+  private domPlayCooldown = 16;
   private domPlayRemaining = 0;
   private playMeetingTile: GridPoint | null = null;
   private rng: () => number;
@@ -95,6 +113,8 @@ export class NpcController {
           if (wp.facing) startFacing = wp.facing;
         }
         animState = initialActivity;
+      } else if (role === 'cat_companion') {
+        animState = 'sit';
       }
 
       return {
@@ -112,6 +132,14 @@ export class NpcController {
         idleTimer: 1.5 + this.rng() * 2.5,
         repathTimer: 0,
         hasGreetedThisVisit: false,
+        followTimeRemaining: 0,
+        followElapsed: 0,
+        followStartZoneId: null,
+        greetCooldown: 0,
+        activeVisitorId: null,
+        restPose: 'sit',
+        followFidgetTimer: 2.5,
+        roamZoomies: false,
       };
     });
   }
@@ -159,12 +187,18 @@ export class NpcController {
     return getWaypoint(this.map, 'dom_desk');
   }
 
+  private pickCatRestPose(): 'sit' | 'tail_wag' | 'idle' {
+    const r = this.rng();
+    if (r < 0.5) return 'sit';
+    if (r < 0.78) return 'tail_wag';
+    return 'idle';
+  }
+
   public update(ctx: NpcUpdateContext): void {
     const ts = this.map.tileSize;
     const dom = this.npcs.find((n) => n.entity.aiRole === 'dom_schedule');
     const cat = this.npcs.find((n) => n.entity.aiRole === 'cat_companion');
 
-    // Update emote timers for all NPCs
     for (const npc of this.npcs) {
       if (npc.emote) {
         npc.emote.ttl -= ctx.dt;
@@ -172,17 +206,14 @@ export class NpcController {
       }
     }
 
-    // 1. Update Dom's daily schedule & random cat playtime
     if (dom) {
       this.updateDom(dom, cat, ctx, ts);
     }
 
-    // 2. Update Cat Ink's autonomous roaming / greeting / following
     if (cat) {
       this.updateCat(cat, dom, ctx, ts);
     }
 
-    // 3. Static NPCs politely turn to face the visitor when nearby
     for (const npc of this.npcs) {
       if ((npc.entity.aiRole || 'static') !== 'static') continue;
       const dist = Math.hypot(npc.px - ctx.playerX, npc.py - ctx.playerY);
@@ -200,7 +231,6 @@ export class NpcController {
     ctx: NpcUpdateContext,
     ts: number
   ): void {
-    // Handle random playtime with cat during work hours (09:00 - 17:00)
     if (ctx.domActivity === 'work' && cat) {
       if (this.domPlayRemaining > 0) {
         this.domPlayRemaining -= ctx.dt;
@@ -213,12 +243,12 @@ export class NpcController {
             cat.catState = 'roaming';
             cat.path = [];
             cat.idleTimer = 1.2;
+            cat.restPose = this.pickCatRestPose();
           }
         }
       } else {
         this.domPlayCooldown -= ctx.dt;
         if (this.domPlayCooldown <= 0 && dom.path.length === 0) {
-          // Trigger playful break with Cat Ink!
           const playWp = getWaypoint(this.map, 'cat_play');
           this.playMeetingTile = playWp
             ? { x: playWp.x, y: playWp.y }
@@ -231,7 +261,6 @@ export class NpcController {
         }
       }
     } else {
-      // Outside work hours, cancel any active cat playtime
       if (this.domPlayRemaining > 0) {
         this.domPlayRemaining = 0;
         this.playMeetingTile = null;
@@ -243,7 +272,6 @@ export class NpcController {
       dom.domActivity = ctx.domActivity;
     }
 
-    // Resolve desired destination tile for Dom
     let targetTile: GridPoint | null = null;
     let targetFacing: Direction | undefined;
 
@@ -277,7 +305,6 @@ export class NpcController {
       return;
     }
 
-    // Dom is at his destination
     if (dom.domActivity === 'sleep') {
       dom.animState = 'sleep';
       dom.facing = targetFacing || 'down';
@@ -322,6 +349,12 @@ export class NpcController {
     const curTile = { x: Math.round(cat.px / ts), y: Math.round(cat.py / ts) };
     const playerTile = { x: Math.round(ctx.playerX / ts), y: Math.round(ctx.playerY / ts) };
     const distToPlayer = Math.hypot(cat.px - ctx.playerX, cat.py - ctx.playerY);
+    const visitorId = ctx.visitorId || 'local_visitor';
+    const currentZoneId = ctx.playerZoneId ?? null;
+
+    if (cat.greetCooldown > 0) {
+      cat.greetCooldown = Math.max(0, cat.greetCooldown - ctx.dt);
+    }
 
     // Priority 1: Playing with Dom (interrupts roaming & following)
     if (cat.catState === 'playing_with_dom' && dom && this.playMeetingTile) {
@@ -343,7 +376,7 @@ export class NpcController {
         }
       }
 
-      const moved = this.stepAlongPath(cat, 76, ctx.dt, ts);
+      const moved = this.stepAlongPath(cat, 80, ctx.dt, ts);
       if (moved) {
         cat.animState = 'run';
       } else {
@@ -356,31 +389,40 @@ export class NpcController {
       return;
     }
 
-    // Reset visit greeting flag when visitor leaves the house
+    // Detect newly arrived visitor (or a different visitor ID in future multi-visitor mode)
+    const isNewVisitorArrival =
+      ctx.playerIndoors &&
+      cat.catState === 'roaming' &&
+      ((!cat.hasGreetedThisVisit && cat.greetCooldown <= 0) ||
+        (cat.activeVisitorId !== null && cat.activeVisitorId !== visitorId));
+
     if (!ctx.playerIndoors) {
       if (cat.catState === 'following' || cat.catState === 'greeting') {
-        cat.catState = 'roaming';
-        cat.path = [];
-        cat.idleTimer = 1.0;
-        cat.emote = { kind: 'meow', text: 'Meo~', ttl: 1.8 };
+        this.releaseCatToRoam(cat, curTile, ctx, 'Meo~');
       }
       cat.hasGreetedThisVisit = false;
-    } else if (!cat.hasGreetedThisVisit && cat.catState === 'roaming') {
-      // Visitor just stepped into the house while cat is free -> run out to greet!
+      cat.greetCooldown = Math.min(cat.greetCooldown, 2); // Quick reset once visitor exits the house
+    } else if (isNewVisitorArrival) {
       cat.catState = 'greeting';
+      cat.activeVisitorId = visitorId;
       cat.emote = { kind: 'alert', ttl: 1.2 };
       cat.repathTimer = 0;
       cat.path = [];
     }
 
-    // Priority 2: Running to greet visitor who entered the house
+    // Priority 2: Running to greet a newly arrived visitor inside the house
     if (cat.catState === 'greeting') {
       if (distToPlayer <= ts * 1.65) {
         cat.hasGreetedThisVisit = true;
         cat.catState = 'following';
+        cat.followTimeRemaining = 14 + this.rng() * 6; // Short 14-20s welcome hangout!
+        cat.followElapsed = 0;
+        cat.followStartZoneId = currentZoneId;
+        cat.followFidgetTimer = 2.6 + this.rng() * 1.6;
+        cat.restPose = 'sit';
         cat.path = [];
         cat.facing = facingToward(cat.px, cat.py, ctx.playerX, ctx.playerY);
-        cat.emote = { kind: 'meow', text: 'Meo~!', ttl: 2.6 };
+        cat.emote = { kind: 'meow', text: 'Meo~!', ttl: 2.4 };
         ctx.onCatMeow();
         return;
       }
@@ -398,14 +440,29 @@ export class NpcController {
         );
       }
 
-      const moved = this.stepAlongPath(cat, 84, ctx.dt, ts);
-      cat.animState = moved ? 'run' : 'idle';
+      const moved = this.stepAlongPath(cat, 86, ctx.dt, ts);
+      cat.animState = moved ? 'run' : 'tail_wag';
       return;
     }
 
-    // Priority 3: Following visitor politely around all rooms inside the house
+    // Priority 3: Short-duration friendly following & curious circling around the visitor
     if (cat.catState === 'following') {
-      if (distToPlayer > ts * 1.65) {
+      cat.followElapsed += ctx.dt;
+      cat.followTimeRemaining -= ctx.dt;
+
+      // Wander off playfully once the welcome timer expires OR visitor changes room after hanging out
+      const changedRoomAfterHangout =
+        cat.followStartZoneId !== null &&
+        currentZoneId !== null &&
+        currentZoneId !== cat.followStartZoneId &&
+        cat.followElapsed >= 6;
+
+      if (cat.followTimeRemaining <= 0 || changedRoomAfterHangout) {
+        this.releaseCatToRoam(cat, curTile, ctx, 'Purr~', currentZoneId);
+        return;
+      }
+
+      if (distToPlayer > ts * 1.8) {
         cat.repathTimer -= ctx.dt;
         if (cat.repathTimer <= 0 || cat.path.length === 0) {
           cat.repathTimer = 0.35;
@@ -417,35 +474,76 @@ export class NpcController {
             ctx.isTileSolidForNpc,
             true
           );
-          // Stop 1 tile short of the visitor so cat trails right behind
           if (cat.path.length > 1) {
             cat.path.pop();
           }
         }
-        const followSpeed = ctx.playerIsRunning || distToPlayer > ts * 3.5 ? 92 : 60;
+        const followSpeed = ctx.playerIsRunning || distToPlayer > ts * 3.4 ? 90 : 58;
         const moved = this.stepAlongPath(cat, followSpeed, ctx.dt, ts);
-        cat.animState = moved ? (followSpeed > 75 ? 'run' : 'walk') : 'idle';
+        cat.animState = moved ? (followSpeed > 72 ? 'run' : 'walk') : cat.restPose;
       } else {
-        cat.path = [];
-        cat.animState = 'idle';
-        cat.walkPhase = 0;
+        // Near visitor: keep stepping if playfully circling, otherwise sit / tail_wag / circle curiously
+        const moved = this.stepAlongPath(cat, 48, ctx.dt, ts);
+        if (moved) {
+          cat.animState = 'walk';
+          return;
+        }
+
         cat.facing = facingToward(cat.px, cat.py, ctx.playerX, ctx.playerY);
+        cat.animState = cat.restPose;
+        cat.followFidgetTimer -= ctx.dt;
+        if (cat.followFidgetTimer <= 0) {
+          cat.followFidgetTimer = 2.6 + this.rng() * 2.2;
+          if (this.rng() < 0.55) {
+            // Walk playfully to a nearby tile around the visitor!
+            const nearby = this.pickNearbyIndoorTile(playerTile, 2, ctx.isTileSolidForNpc, ctx.isTileIndoors);
+            if (nearby && (nearby.x !== curTile.x || nearby.y !== curTile.y)) {
+              cat.path = findPath(
+                curTile,
+                nearby,
+                this.map.width,
+                this.map.height,
+                ctx.isTileSolidForNpc,
+                false
+              );
+              cat.restPose = this.pickCatRestPose();
+            }
+          } else {
+            // Switch resting animation pose so Cat alternates sitting, tail-wagging & blinking!
+            cat.restPose = cat.restPose === 'sit' ? 'tail_wag' : 'sit';
+          }
+        }
       }
       return;
     }
 
-    // Priority 4: Autonomous roaming across the house
-    const moved = this.stepAlongPath(cat, 46, ctx.dt, ts);
+    // Priority 4: Autonomous roaming across rooms (walk + occasional playful zoomies + sit/tail_wag/idle)
+    const roamSpeed = cat.roamZoomies ? 82 : 48;
+    const moved = this.stepAlongPath(cat, roamSpeed, ctx.dt, ts);
     if (moved) {
-      cat.animState = 'walk';
+      cat.animState = cat.roamZoomies ? 'run' : 'walk';
       return;
     }
 
-    cat.animState = 'idle';
+    cat.animState = cat.restPose;
     cat.idleTimer -= ctx.dt;
+    // Halfway through a long pause, naturally sit down if currently standing
+    if (cat.idleTimer > 0 && cat.idleTimer < 1.8 && cat.restPose === 'tail_wag') {
+      cat.restPose = 'sit';
+    }
+
     if (cat.idleTimer <= 0) {
-      cat.idleTimer = 2.5 + this.rng() * 4.0;
-      const target = this.pickRandomIndoorTile(ctx.isTileSolidForNpc, ctx.isTileIndoors);
+      cat.idleTimer = 3.0 + this.rng() * 4.2;
+      cat.restPose = this.pickCatRestPose();
+      cat.roamZoomies = this.rng() < 0.28; // 28% playful zoomies sprint across rooms!
+
+      // Occasionally head to Ink's cozy cushion in the kitchen to sit & nap
+      const napWp = getWaypoint(this.map, 'cat_nap');
+      const target =
+        napWp && this.rng() < 0.18
+          ? { x: napWp.x, y: napWp.y }
+          : this.pickRandomIndoorTile(ctx.isTileSolidForNpc, ctx.isTileIndoors, currentZoneId);
+
       if (target) {
         cat.path = findPath(
           curTile,
@@ -459,20 +557,83 @@ export class NpcController {
     }
   }
 
-  private pickRandomIndoorTile(
+  private releaseCatToRoam(
+    cat: RuntimeNpc,
+    curTile: GridPoint,
+    ctx: NpcUpdateContext,
+    farewellText: string,
+    avoidZoneId?: string | null
+  ): void {
+    cat.catState = 'roaming';
+    cat.followTimeRemaining = 0;
+    cat.greetCooldown = 36 + this.rng() * 14;
+    cat.roamZoomies = true; // Playfully trot/sprint off to explore another room!
+    cat.restPose = 'sit';
+    cat.idleTimer = 3.2 + this.rng() * 2.5;
+    cat.emote = { kind: 'meow', text: farewellText, ttl: 1.8 };
+
+    const target = this.pickRandomIndoorTile(
+      ctx.isTileSolidForNpc,
+      ctx.isTileIndoors,
+      avoidZoneId
+    );
+    cat.path = target
+      ? findPath(curTile, target, this.map.width, this.map.height, ctx.isTileSolidForNpc, false)
+      : [];
+  }
+
+  private pickNearbyIndoorTile(
+    center: GridPoint,
+    radius: number,
     isSolid: (x: number, y: number) => boolean,
     isIndoors: (x: number, y: number) => boolean
   ): GridPoint | null {
     const candidates: GridPoint[] = [];
-    for (let y = 1; y < this.map.height - 1; y++) {
-      for (let x = 1; x < this.map.width - 1; x++) {
-        if (isIndoors(x, y) && !isSolid(x, y)) {
-          candidates.push({ x, y });
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        if (Math.abs(dx) + Math.abs(dy) < 1) continue;
+        const x = center.x + dx;
+        const y = center.y + dy;
+        if (x > 0 && y > 0 && x < this.map.width - 1 && y < this.map.height - 1) {
+          if (isIndoors(x, y) && !isSolid(x, y)) {
+            candidates.push({ x, y });
+          }
         }
       }
     }
     if (candidates.length === 0) return null;
     return candidates[Math.floor(this.rng() * candidates.length)];
+  }
+
+  private pickRandomIndoorTile(
+    isSolid: (x: number, y: number) => boolean,
+    isIndoors: (x: number, y: number) => boolean,
+    preferOutsideZoneId?: string | null
+  ): GridPoint | null {
+    const all: GridPoint[] = [];
+    const otherRoom: GridPoint[] = [];
+
+    const avoidZone = preferOutsideZoneId
+      ? this.map.zones?.find((z) => z.id === preferOutsideZoneId)
+      : undefined;
+
+    for (let y = 1; y < this.map.height - 1; y++) {
+      for (let x = 1; x < this.map.width - 1; x++) {
+        if (isIndoors(x, y) && !isSolid(x, y)) {
+          const pt = { x, y };
+          all.push(pt);
+          if (
+            avoidZone &&
+            !(x >= avoidZone.x && x < avoidZone.x + avoidZone.w && y >= avoidZone.y && y < avoidZone.y + avoidZone.h)
+          ) {
+            otherRoom.push(pt);
+          }
+        }
+      }
+    }
+    const pool = otherRoom.length > 0 ? otherRoom : all;
+    if (pool.length === 0) return null;
+    return pool[Math.floor(this.rng() * pool.length)];
   }
 
   private stepAlongPath(npc: RuntimeNpc, speed: number, dt: number, ts: number): boolean {

@@ -83,6 +83,8 @@ export type TimeOfDayMode = 'auto' | 'morning' | 'sunset' | 'night' | 'late_nigh
 export type TimePeriod = 'day' | 'sunset' | 'night';
 export type CharacterAnimState =
   | 'idle'
+  | 'tail_wag'
+  | 'sit'
   | 'walk'
   | 'run'
   | 'interact'
