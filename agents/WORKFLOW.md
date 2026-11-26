@@ -21,8 +21,8 @@ Hệ thống được tổ chức thành **7 Agent Skills chuyên trách** (gi�
 | **`dom-level-designer`** *(Mới)* | Thiết kế **bố cục bản đồ**, luồng tham quan triển lãm, phân khu phòng, vị trí khung tranh/vật dụng/NPC waypoints & cổng mở rộng thị trấn | `src/data/maps/*.json`, `docs/ARTIST_MAP_GUIDE.md`, waypoints trong `NpcController.ts` & reachability tests | **Ưu tiên số 1** khi thiết kế/cải tiến không gian nhà & triển lãm |
 | **`dom-minigame-seasonal`** | Nhập **asset theo mùa**, spritesheet/hoạt ảnh nhân vật & cây cối, hiệu ứng hạt/thời tiết, thoại NPC theo mùa & **nhạc/SFX** | `public/assets/game/*`, `public/assets/audio/*`, `scripts/import-game-assets.py`, `src/data/seasons/*`, `src/game/sprites/*`, `src/audio/SoundEngine.ts` | Thu hẹp phạm vi: bỏ phần thiết kế bố cục bản đồ |
 | **`dom-web-designer`** | Tách rõ 2 mảng: **UI/UX web** (Start Screen, Quick Gallery, Flipbook Lightbox, Customizer, HUD, Modals) & **hạ tầng web** (Vite, SEO, GitHub Pages CI/CD) | `src/components/*`, `src/styles/*`, `src/App.tsx`, `index.html`, `vite.config.ts`, `.github/workflows/deploy.yml`, `docs/ARTIST_UI_GUIDE.md` | Không ôm âm thanh game hay test QA cuối |
-| **`dom-network`** *(Mới)* | **Multiplayer Co-Presence**, đồng bộ ngoại hình `16×32`, pixel emoji/emote, chia phòng 15–20 người & tự dự phòng solo | `src/network/*`, `PresenceHud`, `EmoteBar`, realtime backend config (xem [ROADMAP.md](./ROADMAP.md)) | **Phase 2 — làm sau cùng** |
-| **`dom-qa`** *(Mới)* | **Kiểm thử độc lập**: test điện thoại & máy yếu, tốc độ tải/dung lượng bundle & ảnh, lỗi hiển thị/overflow/va chạm/runtime | Chạy `npm run check`, Playwright Desktop (`1440×900`) + Mobile (`390×844` + CPU throttle), xuất báo cáo PASS/FAIL độc lập | Tách khỏi `dom-director` để đảm bảo duyệt khách quan |
+| **`dom-network`** *(Mới)* | **Multiplayer Co-Presence**, đồng bộ ngoại hình `16×32`, pixel emote + Quick Chat song ngữ, chia phòng 15–20 người & tự dự phòng solo | `src/network/*`, `PresenceHud`, `EmoteBar`, realtime backend config (xem [ROADMAP.md](./ROADMAP.md)) | **Phase 3** |
+| **`dom-qa`** *(Mới)* | **Kiểm thử độc lập**: test điện thoại & máy yếu, tốc độ tải/dung lượng bundle & ảnh, lỗi hiển thị/overflow/va chạm/runtime | Chạy `npm run check`, Playwright Desktop (`1440×900`) + Mobile (`390×844` + CPU throttle), xuất báo cáo PASS/FAIL độc lập | Tách khỏi `dom-director`; chạy tổng lực trước Go-Live Phase 4 (và khi cần) |
 
 ---
 
@@ -40,5 +40,5 @@ Hệ thống được tổ chức thành **7 Agent Skills chuyên trách** (gi�
    > `Dùng dom-web-designer tối ưu giao diện Gallery / Flipbook / Mobile HUD...`
 5. **Conversation Kiểm thử độc lập (trước khi ra mắt đợt lớn)**:
    > `Dùng dom-qa kiểm thử toàn bộ trang trên điện thoại, máy yếu, tốc độ tải và báo cáo lỗi...`
-6. **Conversation Multiplayer (Phase 2 — làm sau cùng)**:
-   > `Dùng dom-network thiết kế và triển khai Cozy Multiplayer theo agents/ROADMAP.md...`
+6. **Conversation Multiplayer (Phase 3)**:
+   > `Dùng dom-network thiết kế và triển khai Cozy Multiplayer (Presence + Emotes + Quick Chat song ngữ) theo agents/ROADMAP.md...`
